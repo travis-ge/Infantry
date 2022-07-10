@@ -1,0 +1,34 @@
+%YAML:1.0
+
+armour:
+  debug: 0
+  red_spilt_threshold: 0
+  red_gray_threshold: 120
+  red_green_threshold: 160
+  blue_spilt_threshold: 80
+  blue_gray_threshold: 110
+  blue_green_threshold: 60
+  light_contour_min: 15
+
+energy:
+  debug: 0
+  debug_no_img: 1
+  red_spilt_threshold: 45
+  red_gray_threshold: 75
+  red_green_threshold: 141
+  blue_spilt_threshold: 80
+  blue_gray_threshold: 110
+  blue_green_threshold: 80
+  fan_size_threshold: 3000
+  area_rate_min: 0.4
+  area_rate_max: 0.6
+
+base:
+  simple_pitch_diff: 0.005
+  simple_yaw_diff: -0.018
+  sentry_pitch_diff: -0.005
+  sentry_yaw_diff: -0.018
+  buff_pitch_diff: 0.01
+  buff_yaw_diff: 0.001
+
+

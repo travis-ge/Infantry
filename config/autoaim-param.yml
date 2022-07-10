@@ -1,0 +1,15 @@
+%YAML:1.0
+---
+# predict
+Q00: 5
+Q11: 5
+Q22: 30
+Q33: 5
+Q44: 2
+# measure
+R00: 1
+R11: 1
+R22: 800
+
+DEBUG: 1
+DEAD_BUFFER: 20

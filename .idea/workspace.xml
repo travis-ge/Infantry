@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakeReloadState">
+    <option name="reloaded" value="true" />
+  </component>
+  <component name="CMakeRunConfigurationManager">
+    <generated>
+      <config projectName="ArmourShoot" targetName="src" />
+      <config projectName="ArmourShoot" targetName="ArmourShoot" />
+    </generated>
+  </component>
+  <component name="CMakeSettings" AUTO_RELOAD="true">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" GENERATION_DIR="build" CONFIG_NAME="Debug" GENERATION_OPTIONS="-G &quot;Unix Makefiles&quot;" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4459d475-be6b-478d-9dd8-94b9b1592471" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/record/Record.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/record/Record.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/classifier/num_classifier.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/classifier/num_classifier.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/predictor/EKFPredictor.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/predictor/EKFPredictor.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/shooter/shooter.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/shooter/shooter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/infantry.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/infantry.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/cam_param.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/cameraParams_156.xml" beforeDir="false" afterPath="$PROJECT_DIR$/config/cameraParams_156.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/camera_061.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/camera_062.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/camera_156.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/camera_159.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/data.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/model.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/IndusCamera/camera_api.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/IndusCamera/camera_api.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/IndusCamera/camera_api.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/IndusCamera/camera_api.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/armour/armour.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/armour/armour.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/armour/armour.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/armour/armour.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/base/base.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/base/base.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/base/base.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/base/base.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/classifier/Classifier.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/classifier/Classifier.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/classifier/Classifier.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/classifier/Classifier.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/classifier/svm.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/classifier/svm.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/classifier/svm.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/classifier/svm.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/common.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/common.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/energy/ArmourFinder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/ArmourFinder.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/energy/ArmourFinder.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/ArmourFinder.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/energy/SolveSine.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/SolveSine.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/energy/energy.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/energy.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/energy/energy.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/energy.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/energy/tool_fun.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/tool_fun.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/predictor/kalman.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/kalman.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/predictor/kalman.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/kalman.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/predictor/predictor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/predictor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/predictor/predictor.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/predictor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/serial/serial_port.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial/serial_port.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/serial/serial_port.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial/serial_port.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tic_toc.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/tic_toc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/topaimer/Aimer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/Aimer.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/topaimer/Ransac.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/Ransac.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/topaimer/StaticAimer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/StaticAimer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/topaimer/StaticAimer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/StaticAimer.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/topaimer/TopAimer.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/TopAimer.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/topaimer/aimer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/aimer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/topaimer/antiTop.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/antiTop.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/topaimer/antiTop.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/antiTop.h" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/config/params4.yml" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/main.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/base/base.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/energy/energy.cpp" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/src/predictor/AdaptiveEKF.hpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/predictor/EKFPredictor.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/predictor/EKFPredictor.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/predictor/kalman.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/predictor/kalman_filter.hpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/predictor/predictor.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/shooter/shooter.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/shooter/shooter.h" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectApplicationVersion">
+    <option name="ide" value="CLion" />
+    <option name="majorVersion" value="2021" />
+    <option name="minorVersion" value="3.4" />
+  </component>
+  <component name="ProjectId" id="27VzZBLJDCtaK5RGOR1BrleFHSQ" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowPanel.toolwindow.highlight.mappings&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowPanel.toolwindow.highlight.symlinks&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowPanel.toolwindow.show.date&quot;: &quot;false&quot;,
+    &quot;WebServerToolWindowPanel.toolwindow.show.permissions&quot;: &quot;false&quot;,
+    &quot;WebServerToolWindowPanel.toolwindow.show.size&quot;: &quot;false&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;cmake.loaded.for.project&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/aididiz/workspace/infantry（复件）&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;CMakeSettings&quot;,
+    &quot;settings.editor.splitter.proportion&quot;: &quot;0.32815534&quot;
+  }
+}</component>
+  <component name="RunManager" selected="CMake Application.ArmourShoot">
+    <configuration name="ArmourShoot" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ArmourShoot" TARGET_NAME="ArmourShoot" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="ArmourShoot" RUN_TARGET_NAME="ArmourShoot">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="src" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ArmourShoot" TARGET_NAME="src" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="CMake Application.ArmourShoot" />
+      <item itemvalue="CMake Application.src" />
+    </list>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4459d475-be6b-478d-9dd8-94b9b1592471" name="Changes" comment="" />
+      <created>1649420095607</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1649420095607</updated>
+      <workItem from="1649420099658" duration="5378000" />
+      <workItem from="1649426589985" duration="3228000" />
+      <workItem from="1649430198432" duration="3533000" />
+      <workItem from="1649516071586" duration="102000" />
+      <workItem from="1649516234566" duration="2710000" />
+      <workItem from="1649575296832" duration="70000" />
+      <workItem from="1649582268497" duration="1032000" />
+      <workItem from="1649774960313" duration="1783000" />
+      <workItem from="1649777271080" duration="2504000" />
+      <workItem from="1649780412109" duration="1175000" />
+      <workItem from="1649781791670" duration="1145000" />
+      <workItem from="1649936675898" duration="37000" />
+      <workItem from="1649937096910" duration="238000" />
+      <workItem from="1649941319449" duration="1967000" />
+      <workItem from="1650093095424" duration="1681000" />
+      <workItem from="1650095063932" duration="1177000" />
+      <workItem from="1650098650239" duration="42000" />
+      <workItem from="1650286562968" duration="2000" />
+      <workItem from="1650286889015" duration="2825000" />
+      <workItem from="1650291078581" duration="192000" />
+      <workItem from="1650732621833" duration="1159000" />
+      <workItem from="1650733911070" duration="3375000" />
+      <workItem from="1650814372962" duration="1191000" />
+      <workItem from="1650935767144" duration="4367000" />
+      <workItem from="1650940609582" duration="4560000" />
+      <workItem from="1650945804305" duration="2100000" />
+      <workItem from="1650954173507" duration="2313000" />
+      <workItem from="1650956884562" duration="3936000" />
+      <workItem from="1650961698828" duration="2773000" />
+      <workItem from="1650981212150" duration="975000" />
+      <workItem from="1651058258485" duration="3357000" />
+      <workItem from="1651062045421" duration="3849000" />
+      <workItem from="1651066075552" duration="4915000" />
+      <workItem from="1651071122912" duration="3946000" />
+      <workItem from="1651075594758" duration="1820000" />
+      <workItem from="1651078765944" duration="227000" />
+      <workItem from="1651238880990" duration="710000" />
+      <workItem from="1651240302891" duration="4512000" />
+      <workItem from="1651245385214" duration="1361000" />
+      <workItem from="1651307293829" duration="2062000" />
+      <workItem from="1651309950527" duration="311000" />
+      <workItem from="1651310270839" duration="731000" />
+      <workItem from="1651311130777" duration="657000" />
+      <workItem from="1651415494252" duration="2279000" />
+      <workItem from="1651417915078" duration="4043000" />
+      <workItem from="1651422443630" duration="2714000" />
+      <workItem from="1651478684678" duration="2267000" />
+      <workItem from="1651481132067" duration="4026000" />
+      <workItem from="1651485505000" duration="3440000" />
+      <workItem from="1651489600494" duration="2541000" />
+      <workItem from="1651546360999" duration="1407000" />
+      <workItem from="1651547809832" duration="1000" />
+      <workItem from="1651548720026" duration="3062000" />
+      <workItem from="1651572733215" duration="129000" />
+      <workItem from="1651573234593" duration="16000" />
+      <workItem from="1651573355930" duration="399000" />
+      <workItem from="1651591612392" duration="2493000" />
+      <workItem from="1651595056049" duration="554000" />
+      <workItem from="1651664658002" duration="27000" />
+      <workItem from="1651669195867" duration="2163000" />
+      <workItem from="1651672493309" duration="1356000" />
+      <workItem from="1651673921008" duration="204000" />
+      <workItem from="1651890206254" duration="3500000" />
+      <workItem from="1651896829566" duration="1088000" />
+      <workItem from="1651898101771" duration="1426000" />
+      <workItem from="1651904833229" duration="167000" />
+      <workItem from="1651905846364" duration="2941000" />
+      <workItem from="1651909024243" duration="1893000" />
+      <workItem from="1651911109616" duration="415000" />
+      <workItem from="1651931542229" duration="133000" />
+      <workItem from="1651932824355" duration="579000" />
+      <workItem from="1651975029248" duration="2516000" />
+      <workItem from="1651986826459" duration="1525000" />
+      <workItem from="1651988707102" duration="1722000" />
+      <workItem from="1651991374000" duration="2242000" />
+      <workItem from="1651993716566" duration="3662000" />
+      <workItem from="1651997806140" duration="729000" />
+      <workItem from="1652446184791" duration="2885000" />
+      <workItem from="1652584123162" duration="2286000" />
+      <workItem from="1652586526854" duration="1008000" />
+      <workItem from="1652622842939" duration="25000" />
+      <workItem from="1652622896873" duration="563000" />
+      <workItem from="1652673991611" duration="2927000" />
+      <workItem from="1652677157915" duration="220000" />
+      <workItem from="1652786411857" duration="42000" />
+      <workItem from="1652786564588" duration="1900000" />
+      <workItem from="1652793533106" duration="1041000" />
+      <workItem from="1652794669514" duration="2669000" />
+      <workItem from="1652859273031" duration="3533000" />
+      <workItem from="1652863525199" duration="2855000" />
+      <workItem from="1652878802663" duration="2524000" />
+      <workItem from="1652965012632" duration="1898000" />
+      <workItem from="1653052883036" duration="190000" />
+      <workItem from="1653118238160" duration="371000" />
+      <workItem from="1653209625874" duration="1384000" />
+      <workItem from="1653237948749" duration="2328000" />
+      <workItem from="1654175566696" duration="323000" />
+      <workItem from="1654230363508" duration="2613000" />
+      <workItem from="1654238024173" duration="1257000" />
+      <workItem from="1654239394734" duration="1741000" />
+      <workItem from="1654241228846" duration="2634000" />
+      <workItem from="1654244212678" duration="3042000" />
+      <workItem from="1654257012331" duration="3828000" />
+      <workItem from="1654261035920" duration="4356000" />
+      <workItem from="1654277860237" duration="2211000" />
+      <workItem from="1654280888889" duration="1216000" />
+      <workItem from="1654332028147" duration="2308000" />
+      <workItem from="1654334558531" duration="3460000" />
+      <workItem from="1654343075127" duration="3087000" />
+      <workItem from="1654350175746" duration="3577000" />
+      <workItem from="1654354819108" duration="2563000" />
+      <workItem from="1654358706020" duration="24000" />
+      <workItem from="1654358739065" duration="3496000" />
+      <workItem from="1654363805391" duration="1251000" />
+      <workItem from="1654415584126" duration="945000" />
+      <workItem from="1654426526107" duration="1504000" />
+      <workItem from="1654432215683" duration="850000" />
+      <workItem from="1654439760713" duration="419000" />
+      <workItem from="1654499110427" duration="1294000" />
+      <workItem from="1654514953488" duration="3633000" />
+      <workItem from="1654521319859" duration="990000" />
+      <workItem from="1654541742451" duration="2061000" />
+      <workItem from="1654544192323" duration="23000" />
+      <workItem from="1655026928217" duration="3774000" />
+      <workItem from="1655040431677" duration="3000" />
+      <workItem from="1655040690769" duration="63000" />
+      <workItem from="1655040775573" duration="86000" />
+      <workItem from="1655085791183" duration="1168000" />
+      <workItem from="1655139206810" duration="1750000" />
+      <workItem from="1655142503150" duration="1046000" />
+      <workItem from="1655143758746" duration="2331000" />
+      <workItem from="1655146245967" duration="242000" />
+      <workItem from="1655191766385" duration="534000" />
+      <workItem from="1655217291670" duration="51000" />
+      <workItem from="1655258799782" duration="27000" />
+      <workItem from="1655260000196" duration="1450000" />
+      <workItem from="1655261669662" duration="3000" />
+      <workItem from="1655301753284" duration="259000" />
+      <workItem from="1655302030778" duration="187000" />
+      <workItem from="1656418370412" duration="291000" />
+      <workItem from="1656418676488" duration="3000" />
+      <workItem from="1656488666122" duration="1048000" />
+      <workItem from="1656490018570" duration="4000" />
+      <workItem from="1656517335320" duration="3948000" />
+      <workItem from="1656578400166" duration="666000" />
+      <workItem from="1656579674301" duration="1734000" />
+      <workItem from="1656583653527" duration="601000" />
+      <workItem from="1656592237739" duration="5758000" />
+      <workItem from="1656598201296" duration="913000" />
+      <workItem from="1656635271865" duration="3011000" />
+      <workItem from="1656656861039" duration="22415000" />
+      <workItem from="1656695526565" duration="996000" />
+      <workItem from="1656696633793" duration="9085000" />
+      <workItem from="1656744347293" duration="16389000" />
+      <workItem from="1656768033911" duration="12512000" />
+      <workItem from="1656810983181" duration="2886000" />
+      <workItem from="1656818100252" duration="1694000" />
+      <workItem from="1656832491426" duration="21439000" />
+      <workItem from="1656895098870" duration="13114000" />
+      <workItem from="1656922800310" duration="1960000" />
+      <workItem from="1656938488307" duration="1141000" />
+      <workItem from="1656942990137" duration="10799000" />
+      <workItem from="1657018662860" duration="31000" />
+      <workItem from="1657018745490" duration="22000" />
+      <workItem from="1657021023969" duration="12588000" />
+      <workItem from="1657069910378" duration="1562000" />
+      <workItem from="1657073318168" duration="11262000" />
+      <workItem from="1657098563216" duration="13000" />
+      <workItem from="1657124590220" duration="1688000" />
+      <workItem from="1657155282933" duration="23000" />
+      <workItem from="1657155370518" duration="14627000" />
+      <workItem from="1657202117409" duration="1234000" />
+      <workItem from="1657261782041" duration="7893000" />
+      <workItem from="1657282375168" duration="9614000" />
+      <workItem from="1657335501592" duration="577000" />
+      <workItem from="1657336142524" duration="3013000" />
+      <workItem from="1657351512869" duration="12497000" />
+      <workItem from="1657372778360" duration="11711000" />
+      <workItem from="1657418961491" duration="290000" />
+      <workItem from="1657419262041" duration="612000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/energy/ArmourFinder.cpp</url>
+          <line>616</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/predictor/predictor.cpp</url>
+          <line>137</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="CMakeRunConfiguration">
+        <watch expression="tmp_armour_seq.size()" language="ObjectiveC" />
+        <watch expression="fit_spd" />
+        <watch expression="v_angle" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
