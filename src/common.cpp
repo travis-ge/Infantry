@@ -74,7 +74,7 @@ void Frame_0_ProcessRGB(GX_FRAME_CALLBACK_PARAM *pFrame) {
         //cv::Mat image_bgr;
         //cv::cvtColor(image_rgb24,image_bgr,CV_RGB2BGR);
         mImg_buf.lock();
-        if(img_buf.size()>5){
+        if(img_buf.size()>2){
             img_buf.pop();
         }
         img_buf.push(make_pair(t0, image_rgb24));

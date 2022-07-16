@@ -1,11 +1,11 @@
 # Infantry
-## ID: 4
-## Driver: YuqiCheng
-
-## Achived:
-- Auaoaim(without predict)
-- Sentry predict
-- 
-
-
-Copyright @Ares-Vision-Team
+## Params 
+ **3:** 156  
+ **4:** 061  
+ **5:** 157  
+ **6:** 332
+ 
+*3* 1  
+*4* 2
+*5* 3  
+*6* 4

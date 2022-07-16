@@ -23,8 +23,8 @@ add_library(src SHARED ${ARMOUR_DIR}
         ${ENERGY_DIR}
         ${Filter_DIR}
 
-        common.cpp shooter/shooter.cpp shooter/shooter.h energy/data_tpye.h predictor/EKFPredictor.cpp predictor/EKFPredictor.h
-        predictor/kalman_filter.cpp classifier/num_classifier.cpp classifier/num_classifier.h)
+        common.cpp shooter/shooter.cpp shooter/shooter.h
+        )
 
 target_link_libraries(src
         #${CERES_LIBRARIES}

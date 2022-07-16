@@ -14,39 +14,21 @@
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
     <configurations>
-      <configuration PROFILE_NAME="Debug" ENABLED="true" GENERATION_DIR="build" CONFIG_NAME="Debug" GENERATION_OPTIONS="-G &quot;Unix Makefiles&quot;" />
+      <configuration PROFILE_NAME="Debug" ENABLED="true" GENERATION_DIR="build" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Default" GENERATION_OPTIONS="-G &quot;Unix Makefiles&quot;" />
     </configurations>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4459d475-be6b-478d-9dd8-94b9b1592471" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/record/Record.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/record/Record.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/classifier/num_classifier.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/classifier/num_classifier.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/predictor/EKFPredictor.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/predictor/EKFPredictor.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/shooter/shooter.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/shooter/shooter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/infantry.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/infantry.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/cam_param.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/cameraParams_156.xml" beforeDir="false" afterPath="$PROJECT_DIR$/config/cameraParams_156.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/camera_061.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/camera_062.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/camera_156.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/camera_159.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/data.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/model.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/autoaim-param.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config/autoaim-param.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/filter_param.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/filter_param.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/params3.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config/params3.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/params4.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config/params4.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/params5.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config/params5.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/IndusCamera/camera_api.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/IndusCamera/camera_api.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/IndusCamera/camera_api.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/IndusCamera/camera_api.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/armour/armour.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/armour/armour.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/armour/armour.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/armour/armour.h" afterDir="false" />
@@ -54,31 +36,18 @@
       <change beforePath="$PROJECT_DIR$/src/base/base.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/base/base.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/classifier/Classifier.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/classifier/Classifier.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/classifier/Classifier.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/classifier/Classifier.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/classifier/svm.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/classifier/svm.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/classifier/svm.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/classifier/svm.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/common.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/common.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/common.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/common.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/energy/ArmourFinder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/ArmourFinder.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/energy/ArmourFinder.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/ArmourFinder.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/energy/SolveSine.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/SolveSine.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/energy/energy.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/energy.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/energy/energy.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/energy.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/energy/tool_fun.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/energy/tool_fun.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/predictor/kalman.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/kalman.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/predictor/kalman.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/kalman.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/predictor/EKFPredictor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/EKFPredictor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/predictor/EKFPredictor.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/EKFPredictor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/predictor/kalman.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/predictor/kalman.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/predictor/kalman_filter.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/predictor/kalman_filter.hpp" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/predictor/predictor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/predictor.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/predictor/predictor.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/predictor.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/serial/serial_port.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial/serial_port.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/serial/serial_port.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial/serial_port.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tic_toc.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/tic_toc.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/topaimer/Aimer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/Aimer.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/topaimer/Ransac.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/Ransac.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/topaimer/StaticAimer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/StaticAimer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/topaimer/StaticAimer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/StaticAimer.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/topaimer/TopAimer.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/TopAimer.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/topaimer/aimer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/aimer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/topaimer/antiTop.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/antiTop.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/topaimer/antiTop.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/topaimer/antiTop.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,13 +72,15 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/config/params4.yml" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/main.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/armour/armour.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/base/base.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/energy/energy.cpp" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/src/common.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/common.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/energy/ArmourFinder.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/energy/energy.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/predictor/AdaptiveEKF.hpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/predictor/EKFPredictor.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/predictor/EKFPredictor.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/predictor/kalman.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/predictor/kalman_filter.hpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/predictor/predictor.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/shooter/shooter.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/shooter/shooter.h" root0="FORCE_HIGHLIGHTING" />
@@ -130,28 +101,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowPanel.toolwindow.highlight.mappings&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowPanel.toolwindow.highlight.symlinks&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowPanel.toolwindow.show.date&quot;: &quot;false&quot;,
-    &quot;WebServerToolWindowPanel.toolwindow.show.permissions&quot;: &quot;false&quot;,
-    &quot;WebServerToolWindowPanel.toolwindow.show.size&quot;: &quot;false&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;cmake.loaded.for.project&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/aididiz/workspace/infantry（复件）&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;CMakeSettings&quot;,
-    &quot;settings.editor.splitter.proportion&quot;: &quot;0.32815534&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "true",
+    "WebServerToolWindowPanel.toolwindow.highlight.mappings": "true",
+    "WebServerToolWindowPanel.toolwindow.highlight.symlinks": "true",
+    "WebServerToolWindowPanel.toolwindow.show.date": "false",
+    "WebServerToolWindowPanel.toolwindow.show.permissions": "false",
+    "WebServerToolWindowPanel.toolwindow.show.size": "false",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "cmake.loaded.for.project": "true",
+    "last_opened_file_path": "/home/aididiz/workspace/TUP-InfantryVision-2022-main/TUP-InfantryVision-2022-main",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "CMakeSettings",
+    "settings.editor.splitter.proportion": "0.32815534"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="CMake Application.ArmourShoot">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="ArmourShoot" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ArmourShoot" TARGET_NAME="ArmourShoot" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="ArmourShoot" RUN_TARGET_NAME="ArmourShoot">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -355,6 +331,27 @@
       <workItem from="1657372778360" duration="11711000" />
       <workItem from="1657418961491" duration="290000" />
       <workItem from="1657419262041" duration="612000" />
+      <workItem from="1657442112305" duration="2767000" />
+      <workItem from="1657510601632" duration="1191000" />
+      <workItem from="1657529967249" duration="5194000" />
+      <workItem from="1657612947622" duration="3658000" />
+      <workItem from="1657629210501" duration="33000" />
+      <workItem from="1657639054251" duration="4323000" />
+      <workItem from="1657678151252" duration="14506000" />
+      <workItem from="1657710691744" duration="90000" />
+      <workItem from="1657711433704" duration="7767000" />
+      <workItem from="1657725157580" duration="792000" />
+      <workItem from="1657727301000" duration="1442000" />
+      <workItem from="1657729379715" duration="11000" />
+      <workItem from="1657729437339" duration="5514000" />
+      <workItem from="1657765132702" duration="8870000" />
+      <workItem from="1657796227804" duration="10000" />
+      <workItem from="1657796278499" duration="7419000" />
+      <workItem from="1657814849065" duration="5039000" />
+      <workItem from="1657870307203" duration="8638000" />
+      <workItem from="1657881870008" duration="4625000" />
+      <workItem from="1657897614742" duration="34000" />
+      <workItem from="1657938663820" duration="22631000" />
     </task>
     <servers />
   </component>
@@ -382,8 +379,33 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/predictor/predictor.cpp</url>
-          <line>137</line>
+          <line>138</line>
           <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/armour/armour.cpp</url>
+          <line>608</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/armour/armour.cpp</url>
+          <line>700</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/predictor/predictor.cpp</url>
+          <line>277</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/predictor/predictor.cpp</url>
+          <line>251</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/armour/armour.cpp</url>
+          <line>33</line>
+          <option name="timeStamp" value="14" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

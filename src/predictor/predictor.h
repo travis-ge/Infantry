@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include "particle_filter.h"
+#include "common.h"
 class Predictor{
 public:
 
@@ -34,8 +36,17 @@ public:
     float filter_direction_ = 0;
     double sentry_dis = 0;
     double sentry_dis_last = 0;
-
+    bool predict(double abs_pitch, double abs_yaw, double time_stamp,double &pre_yaw);
 private:
+    bool monitor(double abs_pitch, double abs_yaw, double time_stamp,double &yaw);
+//    cv::Point2f predict(double abs_pitch, double abs_yaw, double time_stamp);
+    std::vector<std::pair<double ,double>> pitch_queue;
+    std::vector<std::pair<double ,double>> yaw_queue;
+
+
+
+    const string pf_config = PROJECT_DIR"/config/filter_param.yaml";
+    bool is_filter_inited = false;
     double last_loss;
     long long t_last;
     cv::Point3f last_p;

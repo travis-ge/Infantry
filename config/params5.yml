@@ -1,13 +1,13 @@
 %YAML:1.0
-
+# QUAN XIANG
 armour:
   debug: 0
-  red_spilt_threshold: 0
-  red_gray_threshold: 120
-  red_green_threshold: 160
-  blue_spilt_threshold: 80
-  blue_gray_threshold: 110
-  blue_green_threshold: 60
+  red_spilt_threshold: 85
+  red_gray_threshold: 115
+  red_green_threshold: 95
+  blue_spilt_threshold: 95
+  blue_gray_threshold: 140
+  blue_green_threshold: 108
   light_contour_min: 15
 
 energy:
@@ -24,8 +24,8 @@ energy:
   area_rate_max: 0.6
 
 base:
-  simple_pitch_diff: 0.005
-  simple_yaw_diff: -0.018
+  simple_pitch_diff: 0.020
+  simple_yaw_diff: 0.00
   sentry_pitch_diff: -0.005
   sentry_yaw_diff: -0.018
   buff_pitch_diff: 0.01

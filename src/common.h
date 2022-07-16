@@ -4,15 +4,41 @@
 
 #ifndef CAM_POSE_CALIB_COMMON_H
 #define CAM_POSE_CALIB_COMMON_H
+#include <iostream>
+#include <chrono>
+#include <vector>
 #include "camera_api.h"
-#include "chrono"
+
 
 #ifdef PATH
 #define PROJECT_DIR PATH
 #else
 #define PROJECT_DIR ""
 #endif
+/**
+ *
+ * @param pFrame
+ */
+void Frame_0_ProcessRGB(GX_FRAME_CALLBACK_PARAM *pFrame);
+/**
+ *
+ */
 
+#define INFANTRY6
+/****/
+#ifdef INFANTRY3
+#define
+#elifdef INFANTRY4
+#define
+#elifdef INFANTRY5
+#define
+#elifdef INFANTRY6
+#define cameraParam PROJECT_DIR"/config/cameraParams_332.xml"
+#define Param PROJECT_DIR"/config/params6.yml"
+#endif
+/**
+ *
+ */
 enum STATE{
     STATE_AUTOAIM = 1,
     STATE_BUFF = 2,
@@ -21,7 +47,11 @@ enum STATE{
     STATE_RECORD = 5
 };
 
+
 STATE getMode(char infor);
-void Frame_0_ProcessRGB(GX_FRAME_CALLBACK_PARAM *pFrame);
+
+/** =============================================**/
+//#define SHOW_DST
+//#define WRITE_IMG
 #endif //CAM_POSE_CALIB_COMMON_H
 

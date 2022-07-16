@@ -17,12 +17,12 @@ static char *line = NULL;
 static int max_line_len;
 
 std::ostringstream oss;
-
-svm_model *my_model = svm_load_model(PROJECT_DIR"/config/model.txt");
+//using namespace cv;
+svm_model *my_model = svm_load_model(PROJECT_DIR"/config/model6.txt");
 Classifier::Classifier() {
     sample_path_ = PROJECT_DIR"/data/sample/";
-    dataset_path_ = PROJECT_DIR"/config/data.txt";
-    model_path_ = PROJECT_DIR"/config/model.txt";
+    dataset_path_ = PROJECT_DIR"/config/data4.txt";
+    model_path_ = PROJECT_DIR"/config/model6.txt";
 //    lodeSample();
 //    trainModel();
 }
@@ -80,9 +80,10 @@ void Classifier::lodeSample() {
             //处理HOG特征
 //            cv::imshow("sample", trainingImg_);
 //            cv::waitKey(0);
-            cv::HOGDescriptor *hog = new cv::HOGDescriptor(cv::Size(128, 128), cv::Size(8, 8), cv::Size(8, 8), cv::Size(8, 8), 9);
+            cv::HOGDescriptor *hog = new cv::HOGDescriptor(cv::Size(28, 28), cv::Size(14, 14), cv::Size(7, 7), cv::Size(7, 7), 9);
+
             std::vector<float> descriptors;//存放结果    为HOG描述子向量
-            hog->compute(trainingImg_, descriptors, cv::Size(16, 16)); //Hog特征计算，检测窗口移动步长(1,1)
+            hog->compute(trainingImg_, descriptors, cv::Size(7, 7)); //Hog特征计算，检测窗口移动步长(1,1)
             std::cout << "HOG描述子向量维数    : " << descriptors.size() << std::endl;
             for (int j = 0; j < descriptors.size(); j++) {
                 data_set << j+1;
@@ -228,6 +229,40 @@ void Classifier::trainModel() {
 
     std::cout << "train over" << std::endl;
 }
+
+void Classifier::gammaTransform(cv::Mat &srcImage, cv::Mat &resultImage, float kFactor) {
+    unsigned char LUT[256];
+    for (int i = 0; i < 256; i++)
+    {
+        float f = (i + 0.5f) / 255;
+        f = (float)(pow(f, kFactor));
+        LUT[i] = cv::saturate_cast<uchar>(f * 255.0f - 0.5f);
+    }
+
+    if (srcImage.channels() == 1)
+    {
+        cv::MatIterator_<uchar> iterator = resultImage.begin<uchar>();
+        cv::MatIterator_<uchar> iteratorEnd = resultImage.end<uchar>();
+        for (; iterator != iteratorEnd; iterator++)
+        {
+            *iterator = LUT[(*iterator)];
+        }
+    }
+    else
+    {
+
+
+        cv::MatIterator_<cv::Vec3b> iterator = resultImage.begin<cv::Vec3b>();
+        cv::MatIterator_<cv::Vec3b> iteratorEnd = resultImage.end<cv::Vec3b>();
+        for (; iterator != iteratorEnd; iterator++)
+        {
+            (*iterator)[0] = LUT[((*iterator)[0])];//b
+            (*iterator)[1] = LUT[((*iterator)[1])];//g
+            (*iterator)[2] = LUT[((*iterator)[2])];//r
+        }
+    }
+
+}
 /**
  *
  * @param src
@@ -236,12 +271,19 @@ void Classifier::trainModel() {
 int Classifier::numPredict(cv::Mat &src) {
 
     cv::cvtColor(src,src,CV_BGR2GRAY);
+
+    cv::Mat element3  = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(3,3));
+    cv::erode(src,src,element3);
+    cv::dilate(src,src,element3);
+    cv::erode(src,src,element3);
+    cv::dilate(src,src,element3);
+    gammaTransform(src,src,0.3);
     threshold(src, src, 0 ,255,cv::THRESH_OTSU);
-    cv::resize(src, src, cv::Size(128,128));
+    cv::resize(src, src, cv::Size(28,28));
 //    cv::imshow("asmple", src);
     //处理HOG特征
 
-    hog->compute(src, descriptors, cv::Size(16, 16)); //Hog特征计算，检测窗口移动步长(1,1)
+    hog->compute(src, descriptors, cv::Size(7, 7)); //Hog特征计算，检测窗口移动步长(1,1)
 
     svm_node *features = new svm_node[FEATURE_NUM + 1];
     for (int i = 0; i < descriptors.size(); i++) {
@@ -258,12 +300,13 @@ int Classifier::numPredict(cv::Mat &src) {
    // }
 
     int i = (int)Probability - 1;
-    if(a[i]>0.2){
+    if(a[i]>0.6){
         predictValue = Probability;
+        std::cout<<"识别数字："<<Probability<<"      概率:"<<a[i]<<std::endl;
     }else{
         predictValue = -1;
     }
-    std::cout<<"识别数字："<<Probability<<"      概率:"<<a[i]<<std::endl;
+
     return predictValue;
 }
 

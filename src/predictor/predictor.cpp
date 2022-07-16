@@ -9,6 +9,7 @@ Predictor::Predictor(){
     delta_t = 1 / 120;
     iters = 20;
     last_loss = 0;
+    YAML::Node config = YAML::LoadFile(pf_config);
 }
 
 Predictor::~Predictor(){
@@ -183,6 +184,7 @@ bool Predictor::sentry_mode(double &forcast_pixel,double dd){
         initialPredictionData(stm.yaw_w, stm.bulletSpeed, stm.yaw,dd);
         if(forecast_pixels_ > 300){forecast_pixels_ = 300;}
         forcast_pixel = forecast_pixels_;
+        return true;
     }else{
         if (sentry_cnt_ < 5) {
             initial_gyroscope_ += stm.yaw;
@@ -195,6 +197,7 @@ bool Predictor::sentry_mode(double &forcast_pixel,double dd){
 
 bool Predictor::initialPredictionData(float gyro_speed, float _bullet_velocity, float yaw_angle, double dd){
      num_cnt_++;
+     std::cout<<"gyro speed "<< gyro_speed<<std::endl;
   // 隔帧计算
   if (num_cnt_ % 2 == 0) {
     // 判断方向
@@ -242,4 +245,44 @@ bool Predictor::initialPredictionData(float gyro_speed, float _bullet_velocity, 
   if (num_cnt_ % 10 == 0) {
     num_cnt_ = 0;
   }
+}
+
+bool Predictor::monitor(double abs_pitch, double abs_yaw, double time_stamp,double & yaw) {
+    if(pitch_queue.size()>20)
+        pitch_queue.erase(pitch_queue.begin());
+    if(yaw_queue.size()>20)
+        yaw_queue.erase(yaw_queue.begin());
+    pitch_queue.push_back(std::make_pair(time_stamp,abs_pitch));
+    yaw_queue.push_back(std::make_pair(time_stamp,abs_yaw));
+    double pitch_w = 0;
+    double yaw_w = 0;
+    if(pitch_queue.size()>10){
+        double pitch_w_sum = 0;
+        double yaw_w_sum = 0;
+        double cnt = 0;
+        for (int i = 0 ; i < pitch_queue.size()-2 ; i++) {
+            double delta_p = pitch_queue[i+2].second - pitch_queue[i].second;
+            double delta_y = yaw_queue[i+2].second - yaw_queue[i].second;
+            double delta_t = pitch_queue[i+2].first - pitch_queue[i].first;
+
+//            std::cout<<"tttttttttt "<< delta_t << "yyyyyyyyyyyy "<<delta_y<<std::endl;
+            double pitch_w = delta_p / delta_t ;
+
+            double yaw_w = delta_y  / delta_t;
+//            std::cout<<"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy "<<yaw_w<<std::endl;
+            pitch_w_sum += pitch_w;
+            yaw_w_sum += yaw_w;
+            cnt++;
+        }
+
+        pitch_w = pitch_w_sum ;
+        yaw_w = yaw_w_sum /cnt ;
+        cout<<"yyyyyyyyyyyy "<<yaw_w<<std::endl;
+        yaw = yaw_w;
+
+    }
+
+}
+bool Predictor::predict(double abs_pitch, double abs_yaw, double time_stamp, double &pre_yaw) {
+    monitor(abs_pitch,abs_yaw,time_stamp,pre_yaw);
 }

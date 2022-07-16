@@ -34,6 +34,7 @@ public:
     cv::Point3f cam2abs(cv::Point3f camPoint, Ptz_infor stm);
     cv::Point3f abs2cam(cv::Point3f absPoint, Ptz_infor stm);
     void getAngle(cv::Point3f cam_, double &pitch, double &yaw, double &Dis);
+    void getAngle_nofix(cv::Point3f cam_, double &pitch, double &yaw, double &Dis);
     double abs_pitch = 0;
     double abs_yaw = 0;
 

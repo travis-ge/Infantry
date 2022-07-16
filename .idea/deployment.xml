@@ -3,7 +3,27 @@
   <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
+      <paths name="infantry_3 (036331ec-ab2a-4581-94f0-0b393f82a3ee)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/workspace/autoshoot" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/build" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
       <paths name="infantry_5 (54392b82-ee92-445b-be1d-fa0b92bd68b5)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/workspace/infantry" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/build" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+      <paths name="infantry_6 (e1d159e4-4c25-48a4-b62e-a227f5da3ec8)">
         <serverdata>
           <mappings>
             <mapping deploy="/workspace/infantry" local="$PROJECT_DIR$" />

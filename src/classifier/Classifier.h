@@ -8,7 +8,7 @@
 #include <iostream>
 #include "svm.h"
 
-#define FEATURE_NUM 2304
+#define FEATURE_NUM 324
 class Classifier{
 public:
 
@@ -33,7 +33,7 @@ public:
     svm_model *model ;
     svm_node *x_space;
     //
-    cv::HOGDescriptor *hog = new cv::HOGDescriptor(cv::Size(128, 128), cv::Size(8, 8), cv::Size(8, 8), cv::Size(8, 8), 9);
+    cv::HOGDescriptor *hog = new cv::HOGDescriptor(cv::Size(28, 28), cv::Size(14, 14), cv::Size(7, 7), cv::Size(7, 7), 9);
     std::vector<float> descriptors;//存放结果    为HOG描述子向量
 
     int num = 0;
@@ -42,6 +42,7 @@ private:
     cv::Mat sample_gray_;
     cv::Mat sample_threshold_;
     std::string save_path_;
+    void  gammaTransform(cv::Mat& srcImage, cv::Mat& resultImage, float kFactor);
 
 };
 

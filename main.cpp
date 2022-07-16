@@ -1,3 +1,4 @@
+/** Camera Params , Base Params, Energy Params**/
 #include <vector>
 #include <string>
 #include <iostream>
@@ -23,8 +24,8 @@ Armour armour;
 [[noreturn]] void armour_tracking(){
     armour.armour_tracking();
 }
-int main() {
 
+int main() {
     start_time = chrono::steady_clock::now();
     GX_STATUS status = Config();
     if (status != GX_STATUS_SUCCESS) {
@@ -32,7 +33,7 @@ int main() {
         return 0;
     }
     camera_config cam0_info;
-    cam0_info.sn_str = "KE0200120157";
+    cam0_info.sn_str = "KE0200120156";
     cam0_info.SN = &cam0_info.sn_str[0];
     MercureDriver *cam0 = new MercureDriver(cam0_info);
     cam0->InitCamera();
@@ -49,13 +50,15 @@ int main() {
     while (!port.PortInit(0, 115200));
     std::thread serial_receive_thread(port_receive);
     std::thread armour_detect_thread(armour_detect);
+#ifndef SHOW_DST
     std::thread armour_sort_thread(armour_sort);
     std::thread armour_tracking_tread(armour_tracking);
+#endif
     serial_receive_thread.join();
     armour_detect_thread.join();
+#ifndef SHOW_DST
     armour_sort_thread.join();
     armour_tracking_tread.join();
-
-
+#endif
     return 0;
 }

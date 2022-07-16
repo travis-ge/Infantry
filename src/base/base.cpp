@@ -11,7 +11,7 @@ extern SerialPort port;
 extern Ptz_infor stm;
 
 AngleSolver::AngleSolver() {
-    FileStorage fs(PROJECT_DIR"/config/params4.yml", cv::FileStorage::READ);
+    FileStorage fs(PROJECT_DIR"/config/params3.yml", cv::FileStorage::READ);
     fs["base"]["simple_pitch_diff"] >> simple_pitch_diff;
     fs["base"]["simple_yaw_diff"] >> simple_yaw_diff;
     fs["base"]["sentry_pitch_diff"] >> sentry_pitch_diff;
@@ -20,8 +20,8 @@ AngleSolver::AngleSolver() {
     fs["base"]["buff_yaw_diff"] >> buff_yaw_diff;
     fs.release();
     trans <<1,0,0,0,
-            0,1,0,-0.0455,
-            0,0,1,0.1415,
+            0,1,0,-0.0455,   //-0.0455
+            0,0,1,0.1415,  //0.1415
             0,0,0,1;
 }
 
@@ -51,16 +51,16 @@ bool AngleSolver::getRotZ(double roll) {
 }
 
 cv::Point3f AngleSolver::cam2abs(cv::Point3f camPoint, Ptz_infor stm) {
-    if(!getRotX(stm.pitch)){return cv::Point3f(0,0,0);}
-    if(!getRotY(stm.yaw)){return cv::Point3f(0,0,0);}
+    if(!getRotX(-stm.pitch)){return cv::Point3f(0,0,0);}
+    if(!getRotY(-stm.yaw)){return cv::Point3f(0,0,0);}
     if(!getRotZ(0)){return cv::Point3f(0,0,0);}
     pointMat << camPoint.x, camPoint.y, camPoint.z, 1;
     auto result =   trans*RotY*RotX*RotZ*pointMat;
     return cv::Point3f (result(0,0),result(1,0),result(2,0));
 }
 cv::Point3f AngleSolver::abs2cam(cv::Point3f absPoint, Ptz_infor stm) {
-    if(!getRotX(stm.pitch)){return cv::Point3f(0,0,0);}
-    if(!getRotY(stm.yaw)){return cv::Point3f(0,0,0);}
+    if(!getRotX(-stm.pitch)){return cv::Point3f(0,0,0);}
+    if(!getRotY(-stm.yaw)){return cv::Point3f(0,0,0);}
     if(!getRotZ(0)){return cv::Point3f(0,0,0);}
     absPointMat << absPoint.x, absPoint.y, absPoint.z ,1;
     auto T = trans*RotY*RotX*RotZ;
@@ -125,6 +125,12 @@ void AngleSolver::getAngle(cv::Point3f cam_, double &pitch, double &yaw, double 
         pitch += buff_pitch_diff;//0.01
         yaw += buff_yaw_diff;//0.001
     }
+}
+void AngleSolver::getAngle_nofix(cv::Point3f cam_, double &pitch, double &yaw, double &Dis) {
+    cv::Point3f gun_ = cam2gun(cam_, cam2gunDiff);
+    pitch = atan(gun_.y / sqrt(gun_.x * gun_.x + gun_.z * gun_.z));//more big more down
+    yaw = atan(gun_.x / gun_.z); //more big more right
+    Dis = sqrt(gun_.x * gun_.x + gun_.z * gun_.z);
 }
 
 ///==================================== AngleSolver End ==================================================///

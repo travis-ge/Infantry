@@ -3,11 +3,11 @@
 armour:
   debug: 0
   red_spilt_threshold: 85
-  red_gray_threshold: 120
-  red_green_threshold: 96
-  blue_spilt_threshold: 80
-  blue_gray_threshold: 150
-  blue_green_threshold: 60
+  red_gray_threshold: 94
+  red_green_threshold: 164
+  blue_spilt_threshold: 95
+  blue_gray_threshold: 140
+  blue_green_threshold: 100
   light_contour_min: 15
 
 energy:

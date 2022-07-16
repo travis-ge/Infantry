@@ -11,7 +11,8 @@
 
 struct Predict {
     /*
-     * 此处定义匀速直线运动模型
+     * 此处定义匀速直线运动模型  x1 = x0+v*delta_t
+     * x1 = [x,v,]
      */
     template<class T>
     void operator()(const T x0[5], T x1[5]) {
@@ -58,9 +59,6 @@ private:
 
 public:
     inline void load_param(bool update_all = true) {
-        /*
-         * 通过文件读入，实现实时调餐
-         */
         cv::FileStorage fin(PROJECT_DIR"/config/autoaim-param.yml", cv::FileStorage::READ);
 
 
