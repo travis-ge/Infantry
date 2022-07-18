@@ -15,7 +15,7 @@ double SolvePara::PHI[1]={0};
 ParticleFilter pf;
 ParticleFilter pf_param_loader;
 ArmourFinder::ArmourFinder() {
-    FileStorage fs(PROJECT_DIR"/config/params3.yml", FileStorage::READ);
+    FileStorage fs(Param, FileStorage::READ);
     fs["energy"]["red_spilt_threshold"] >> r_spilt_threshold;
     fs["energy"]["red_gray_threshold"] >> r_gray_threshold;
     fs["energy"]["blue_spilt_threshold"] >> b_spilt_threshold;

@@ -5,8 +5,15 @@
 #include "base.h"
 extern Ptz_infor stm;
 cv::Point3f EKFPredictor::predict(cv::Point3f world_point, double t) {
-    double shoot_delay = 0.08;
+    double shoot_delay = 0.1;
     double dis = sqrt(pow(world_point.x,2)+ pow(world_point.y,2)+ pow(world_point.z,2));
+
+
+    if((fabs(dis - last_dis) > 0.15 || (t - last_time) > 1) && inited){
+        inited = false;
+        std::cout<<"ekf reinit "<<std::endl;
+    }
+    std::cout<<"dis error "<<fabs(dis-last_dis)<<std::endl;
     if(!inited){
         last_time = t;
         last_dis = dis;
@@ -16,11 +23,7 @@ cv::Point3f EKFPredictor::predict(cv::Point3f world_point, double t) {
         ekf.init(Xr);
         return world_point;
     }
-    std::cout<<"dis error "<<fabs(dis-last_dis)<<std::endl;
-//    if(fabs(dis - last_dis) > 0.1){
-//        inited = false;
-//        std::cout<<"ekf reinit "<<std::endl;
-//    }
+
     last_dis = dis;
     double delta_t = t - last_time;
     last_time = t;

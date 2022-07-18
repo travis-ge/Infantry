@@ -27,7 +27,7 @@ Energy::Energy() {
         tmp.z = 0;
         realCorners.push_back(tmp);
     }
-    if(!loadCameraParams(PROJECT_DIR"/config/cameraParams_156.xml")){
+    if(!loadCameraParams(cameraParam)){
         clog<<"check param file"<<endl;
     }
     Dis_last = 0;

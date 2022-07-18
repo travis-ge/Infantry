@@ -11,7 +11,7 @@ extern SerialPort port;
 extern Ptz_infor stm;
 
 AngleSolver::AngleSolver() {
-    FileStorage fs(PROJECT_DIR"/config/params3.yml", cv::FileStorage::READ);
+    FileStorage fs(Param, cv::FileStorage::READ);
     fs["base"]["simple_pitch_diff"] >> simple_pitch_diff;
     fs["base"]["simple_yaw_diff"] >> simple_yaw_diff;
     fs["base"]["sentry_pitch_diff"] >> sentry_pitch_diff;
@@ -19,10 +19,15 @@ AngleSolver::AngleSolver() {
     fs["base"]["buff_pitch_diff"] >> buff_pitch_diff;
     fs["base"]["buff_yaw_diff"] >> buff_yaw_diff;
     fs.release();
-    trans <<1,0,0,0,
-            0,1,0,-0.0455,   //-0.0455
-            0,0,1,0.1415,  //0.1415
+    trans <<1,0,0,  0.0405,                             //x
+            0,1,0,-0.0072,   //-0.0455           //y
+            0,0,1,0.0809,  //0.1415              //z
             0,0,0,1;
+
+//    trans <<1,0,0,  0.0,                             //x
+//            0,1,0,-0.0455,   //-0.0455           //y
+//            0,0,1,0.14155,  //0.1415              //z
+//            0,0,0,1;
 }
 
 AngleSolver::~AngleSolver() {
@@ -49,15 +54,26 @@ bool AngleSolver::getRotZ(double roll) {
             0,                       0, 0, 1;
     return true;
 }
-
+/**
+ *    left 40.5mm     front 80.9
+ * @param camPoint
+ * @param stm
+ * @return
+ */
 cv::Point3f AngleSolver::cam2abs(cv::Point3f camPoint, Ptz_infor stm) {
     if(!getRotX(-stm.pitch)){return cv::Point3f(0,0,0);}
     if(!getRotY(-stm.yaw)){return cv::Point3f(0,0,0);}
     if(!getRotZ(0)){return cv::Point3f(0,0,0);}
     pointMat << camPoint.x, camPoint.y, camPoint.z, 1;
-    auto result =   trans*RotY*RotX*RotZ*pointMat;
+    auto result =   trans*RotY*RotX*RotZ*pointMat; // y x z
     return cv::Point3f (result(0,0),result(1,0),result(2,0));
 }
+/**
+ *
+ * @param absPoint
+ * @param stm
+ * @return
+ */
 cv::Point3f AngleSolver::abs2cam(cv::Point3f absPoint, Ptz_infor stm) {
     if(!getRotX(-stm.pitch)){return cv::Point3f(0,0,0);}
     if(!getRotY(-stm.yaw)){return cv::Point3f(0,0,0);}
@@ -94,7 +110,7 @@ void AngleSolver::getAngle(cv::Point3f cam_, double &pitch, double &yaw, double 
     cv::Point3f gun_ = cam2gun(cam_, cam2gunDiff);
     pitch = atan(gun_.y / sqrt(gun_.x * gun_.x + gun_.z * gun_.z));//more big more down
     yaw = atan(gun_.x / gun_.z); //more big more right
-    Dis = sqrt(gun_.x * gun_.x + gun_.z * gun_.z);
+    Dis = sqrt(gun_.x * gun_.x + gun_.z * gun_.z +gun_.y*gun_.y);
 
     double ptz_pitch = stm.pitch;
     //std::cout<<"ppppppppppppppppppppppppp "<<ptz_pitch<<std::endl;
@@ -130,7 +146,7 @@ void AngleSolver::getAngle_nofix(cv::Point3f cam_, double &pitch, double &yaw, d
     cv::Point3f gun_ = cam2gun(cam_, cam2gunDiff);
     pitch = atan(gun_.y / sqrt(gun_.x * gun_.x + gun_.z * gun_.z));//more big more down
     yaw = atan(gun_.x / gun_.z); //more big more right
-    Dis = sqrt(gun_.x * gun_.x + gun_.z * gun_.z);
+    Dis = sqrt(gun_.x * gun_.x + gun_.z * gun_.z +gun_.y*gun_.y);
 }
 
 ///==================================== AngleSolver End ==================================================///

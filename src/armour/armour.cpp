@@ -31,7 +31,7 @@ float armour_big_pt[5][2] = {
 
 Armour::Armour() {
 
-    FileStorage fs1(PROJECT_DIR"/config/params3.yml", FileStorage::READ);
+    FileStorage fs1(Param, FileStorage::READ);
     fs1["armour"]["red_spilt_threshold"] >> r_spilt_threshold;
     fs1["armour"]["red_gray_threshold"] >> r_gray_threshold;
     fs1["armour"]["red_green_threshold"] >> r_green_threshold;
@@ -41,11 +41,10 @@ Armour::Armour() {
     fs1["armour"]["debug"] >> debug;
     fs1["armour"]["light_contour_min"] >> light_contour_min;
     fs1.release();
+    tracking_roi = Rect(0,0,0,0);
     numClass = make_shared<Classifier>();
     angleSolver = make_shared<AngleSolver>();
-    //mlp = make_shared<NumClassifier>(PROJECT_DIR"/config/fc.onnx", PROJECT_DIR"/config/label.txt", 0.8);
     ekf = make_shared<EKFPredictor>();
-    mp = make_shared<MotionPredict>();
 //    predictor = make_shared<Predictor>();
 
 }
@@ -344,8 +343,8 @@ bool Armour::ifShoot(double angle_p, double angle_y) {
  * 1th
  */
 #define K_SPEED 10000
-void Armour::armour_detect() {
-    if (!readCameraParameters(PROJECT_DIR"/config/cameraParams_156.xml")) {
+void Armour::armour_imgProcess() {
+    if (!readCameraParameters(cameraParam)) {
         std::cout << "read camera param fail ..." << std::endl;
     }
     auto start_time = chrono::steady_clock::now();
@@ -674,10 +673,11 @@ void Armour::armour_tracking() {
 //        mArmour_queue.unlock();
         double angle_P, angle_Y, Dis;
         char cmd = 0x30;
+        /// select armour is real
         if (target_armour.armour_PL.x > 0) {
             cmd = 0x31;
             frame_cnt++;
-            std::cout << "find armour !!!" << std::endl;
+//            std::cout << "find armour !!!" << std::endl;
             Point2f corPoints[4];
             target_armour.armour_rect.points(corPoints);
             float armour_width = sqrt(
@@ -694,42 +694,24 @@ void Armour::armour_tracking() {
             auto pixelPoint = cam2pixel(camPoint);
 
 //            std::cout<<"============================= abs "<<world_point<<std::endl;
-#ifdef SENTRY_MODE
-            double pre_pixel;
-            predictor->sentry_dis = sqrt(pow(world_point.x, 2) + pow(world_point.y, 2) + pow(world_point.z, 2));
-
-            if (!predictor->sentry_mode(pre_pixel, predictor->sentry_dis)) {
-                angle_P = angle_Y = Dis = 0;
-            } else {
-                std::cout << "pre pppp" << pre_pixel << std::endl;
-                std::cout << "filter dirrrrrrr  " << predictor->filter_direction_ << std::endl;
-                if (predictor->filter_direction_ > 0.3) {
-                    target_armour.armour_PL.x += pre_pixel;
-                    target_armour.armour_PR.x += pre_pixel;
-                } else if (predictor->filter_direction_ < -0.3) {
-                    target_armour.armour_PL.x -= pre_pixel;
-                    target_armour.armour_PR.x -= pre_pixel;
-                } else {
-
-                }
-                auto campoint = getCamCoordinate(target_armour.armour_PL, target_armour.armour_PR, wh_rate);
-                auto pre = cam2pixel(campoint);
-                angleSolver->getAngle(campoint, angle_P, angle_Y, Dis);
-            }
-#endif
-
 #ifdef USE_PRE
-            auto world_point = angleSolver->cam2abs(camPoint, stm);
+            Ptz_infor use_stm;
+            if(!ekf->inited){
+                current_yaw = stm.yaw;
+            }
+            use_stm.yaw = stm.yaw - current_yaw;
+            use_stm.pitch = stm.pitch;
+            use_stm.bulletSpeed = stm.bulletSpeed;
+            auto world_point = angleSolver->cam2abs(camPoint, use_stm);
             std::cout<<"prepreper" <<time_stamp<<std::endl;
             auto pre_abs = ekf->predict(world_point,time_stamp);
-//            auto pre_abs = mp->predict(world_point);
-            auto pre_cam = angleSolver->abs2cam(pre_abs,stm);
+            auto pre_cam = angleSolver->abs2cam(pre_abs,use_stm);
             auto pre_pixel = cam2pixel(pre_cam);
             angleSolver->getAngle(pre_cam,angle_P,angle_Y,Dis);
 //            auto pre_cam = angleSolver->abs2cam(pre_abs,stm);
 //            auto prepixel = cam2pixel(pre_cam);
 #else
-            angleSolver->getAngle_nofix(camPoint,angle_P,angle_Y,Dis);
+            angleSolver->getAngle(camPoint,angle_P,angle_Y,Dis);
             auto world_point = angleSolver->cam2abs(camPoint,stm);
             //            angleSolver->getAngle(camPoint,angle_P,angle_Y,Dis);
             double abs_yaw = stm.yaw - angle_Y;

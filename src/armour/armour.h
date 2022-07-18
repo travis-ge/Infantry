@@ -10,7 +10,6 @@
 #include "num_classifier.h"
 #include <EKFPredictor.h>
 #include "predictor.h"
-#include "kalman.h"
 using namespace std;
 using namespace cv;
 
@@ -43,7 +42,7 @@ public:
 
     bool ifShoot(double angle_p,double angle_y);
     cv::Point2f cam2pixel(cv::Point3f camPoint);
-    void armour_detect();
+    void armour_imgProcess();
     void armour_tracking();
     ///
     cv::Mat camMatrix;
@@ -52,12 +51,10 @@ public:
     std::vector<cv::Point2f> observationPts;
     cv::Point2f tg_center;
     double cx,cy,fx,fy;
-
-
     cv::Point3f m_position;               //三维坐标信息
     uint8_t debug;
     queue<pair<double,Armour_data>> armour_queue;
-
+    Rect tracking_roi ;
 private:
     bool p_is_inited = false;
     Mat src,src_gray, src_separation, src_green;
@@ -80,17 +77,9 @@ private:
     int b_green_threshold;
     int light_contour_min;
     int last_id = -1;
-
-
     shared_ptr<Classifier> numClass;
     shared_ptr<AngleSolver> angleSolver;
-//    shared_ptr<NumClassifier> mlp;
     shared_ptr<EKFPredictor> ekf;
-    shared_ptr<MotionPredict> mp;
-//    ArmorPredictor predictor_param_loader;
-//    ArmorPredictor predictor;
-    shared_ptr<Predictor> predictor;
-
 };
 
 const Mat element3 = getStructuringElement(MORPH_RECT,Size(3,3));

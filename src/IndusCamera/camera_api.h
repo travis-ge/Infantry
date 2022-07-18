@@ -29,7 +29,7 @@ struct camera_config {
     //设置是否自动曝光
     int ExposureAuto = 0;
     //设置固定曝光时间(单位:um)
-    double Exposure = 4000.0;//2000
+    double Exposure = 5000.0;//2000
     //设置自动曝光时间下限(单位:um)
     double MinExposure = 100.0;
     //设置自动曝光时间上限(单位:um)

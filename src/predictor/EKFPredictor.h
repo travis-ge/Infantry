@@ -53,31 +53,29 @@ class EKFPredictor {
 private:
     AdaptiveEKF<5, 3> ekf;  // 创建ekf
     double last_time;
-    bool inited = false;
+
     double last_dis = 0;
     bool antitop = false;
 
 public:
+    bool inited = false;
     inline void load_param(bool update_all = true) {
-        cv::FileStorage fin(PROJECT_DIR"/config/autoaim-param.yml", cv::FileStorage::READ);
-
-
-        fin["Q00"] >> ekf.Q(0, 0);
-        fin["Q11"] >> ekf.Q(1, 1);
-        fin["Q22"] >> ekf.Q(2, 2);
-        fin["Q33"] >> ekf.Q(3, 3);
-        fin["Q44"] >> ekf.Q(4, 4);
+        cv::FileStorage fin(Param, cv::FileStorage::READ);
+        fin["ekf"]["Q00"] >> ekf.Q(0, 0);
+        fin["ekf"]["Q11"] >> ekf.Q(1, 1);
+        fin["ekf"]["Q22"] >> ekf.Q(2, 2);
+        fin["ekf"]["Q33"] >> ekf.Q(3, 3);
+        fin["ekf"]["Q44"] >> ekf.Q(4, 4);
         // 观测过程协方差
-        fin["R00"] >> ekf.R(0, 0);
-        fin["R11"] >> ekf.R(1, 1);
-        fin["R22"] >> ekf.R(2, 2);
-//        std::cout<<ekf.Q<<std::endl;
-//        std::cout<<ekf.R<<std::endl;
+        fin["ekf"]["R00"] >> ekf.R(0, 0);
+        fin["ekf"]["R11"] >> ekf.R(1, 1);
+        fin["ekf"]["R22"] >> ekf.R(2, 2);
+        std::cout<<ekf.Q<<std::endl;
+        std::cout<<ekf.R<<std::endl;
 
     }
 
     explicit EKFPredictor() {
-        cv::FileStorage fin(PROJECT_DIR"/asset/camera-param.yml", cv::FileStorage::READ);
         load_param();
         std::cout << "Finish create a new EKF." << std::endl;
     }

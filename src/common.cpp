@@ -112,3 +112,6 @@ STATE getMode(char infor){
 
     return mode;
 }
+
+/****/
+double current_yaw = 0;

@@ -31,4 +31,14 @@ base:
   buff_pitch_diff: 0.01
   buff_yaw_diff: 0.001
 
-
+ekf:
+  # predict
+  Q00: 0.1
+  Q11: 10
+  Q22: 0.1
+  Q33: 1
+  Q44: 0.01
+  # measure
+  R00: 1
+  R11: 1
+  R22: 800

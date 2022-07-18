@@ -1,4 +1,3 @@
-/** Camera Params , Base Params, Energy Params**/
 #include <vector>
 #include <string>
 #include <iostream>
@@ -15,8 +14,8 @@ SerialPort port;
 Ptz_infor stm;
 
 Armour armour;
-[[noreturn]] void armour_detect(){
-    armour.armour_detect();
+[[noreturn]] void armour_imgProcess(){
+    armour.armour_imgProcess();
 }
 [[noreturn]] void armour_sort(){
     armour.armourSort();
@@ -33,7 +32,7 @@ int main() {
         return 0;
     }
     camera_config cam0_info;
-    cam0_info.sn_str = "KE0200120156";
+    cam0_info.sn_str = cameraSN;
     cam0_info.SN = &cam0_info.sn_str[0];
     MercureDriver *cam0 = new MercureDriver(cam0_info);
     cam0->InitCamera();
@@ -49,7 +48,7 @@ int main() {
     }
     while (!port.PortInit(0, 115200));
     std::thread serial_receive_thread(port_receive);
-    std::thread armour_detect_thread(armour_detect);
+    std::thread armour_detect_thread(armour_imgProcess);
 #ifndef SHOW_DST
     std::thread armour_sort_thread(armour_sort);
     std::thread armour_tracking_tread(armour_tracking);
