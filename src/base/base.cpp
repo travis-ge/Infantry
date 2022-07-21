@@ -132,7 +132,7 @@ void AngleSolver::getAngle(cv::Point3f cam_, double &pitch, double &yaw, double 
         pitch += sentry_pitch_diff;//-0.012
         yaw += sentry_yaw_diff;//-0.023
     } else {
-//        std::cout << "3ss" << std::endl;
+        std::cout << "3ss" << std::endl;
         pitch += simple_pitch_diff;//-0.010
         yaw += simple_yaw_diff;//-0.023
     }
@@ -183,7 +183,7 @@ Kalman::Kalman(double a_process_noise, double a_measure_noise, double a_val_diff
 }
 
 /**
- *
+ *x
  */
 void Kalman::setParam() {
 

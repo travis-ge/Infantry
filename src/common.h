@@ -37,13 +37,13 @@ STATE getMode(char infor);
 //#define WRITE_IMG
 
 /**==============  3 ================**/
-#define cameraParam PROJECT_DIR"/config/cameraParams_156.xml"
-#define Param PROJECT_DIR"/config/params3.yml"
-#define cameraSN "KE0200120156"
+//#define cameraParam PROJECT_DIR"/config/cameraParams_156.xml"
+//#define Param PROJECT_DIR"/config/params3.yml"
+//#define cameraSN "KE0200120156"
 /**==============  4 ================**/
-//#define cameraParam PROJECT_DIR"/config/cameraParams_061.xml"
-//#define Param PROJECT_DIR"/config/params4.yml"
-//#define cameraSN "KE0200120061"
+#define cameraParam PROJECT_DIR"/config/cameraParams_061.xml"
+#define Param PROJECT_DIR"/config/params4.yml"
+#define cameraSN "KE0200100061"
 /**==============  5 ================**/
 //#define cameraParam PROJECT_DIR"/config/cameraParams_157.xml"
 //#define Param PROJECT_DIR"/config/params5.yml"

@@ -413,7 +413,7 @@ void Armour::armour_imgProcess() {
         }
         auto end = chrono::steady_clock::now();
         double cost = chrono::duration<double, milli>(end - start).count();
-        cout << " armour detect cost " << cost << " ms" << endl;
+//        cout << " armour detect cost " << cost << " ms" << endl;
     }
 }
 
@@ -526,42 +526,6 @@ void Armour::armourSort() {
             tmp_armour_queue.push(make_pair(time_stamp, tmp_armour_vec));
             mTmp_armour_queue.unlock();
         }
-//            if(tmp_armour_vec.size() == 1){
-//            Armour_data armour_data;
-//            armour_data.armour_rect = tmp_armour_vec[0].armour_rect;
-//            armour_data.armour_PL = cv::Point2f (tmp_armour_vec[0].v_Pts_L);
-//            armour_data.armour_PR = cv::Point2f (tmp_armour_vec[0].v_Pts_R);
-//            mArmour_queue.lock();
-//            if(armour_queue.size()>2)
-//                armour_queue.pop();
-//            armour_queue.push(make_pair(time_stamp,armour_data));
-//            mArmour_queue.unlock();
-//        }else{
-//
-//            double min_dis = 10000;
-//            int min_idx = -1;
-//            for(int i = 0; i < tmp_armour_vec.size(); i++){
-//                double dis = fabs(tmp_armour_vec[i].armour_rect.center.x - src.cols / 2) +
-//                             fabs(tmp_armour_vec[i].armour_rect.center.y - src.rows / 2);
-//                if(dis < min_dis){
-//                    min_dis = dis;
-//                    min_idx = i;
-//                }
-//            }
-//            if(min_idx > 0){
-//                Armour_data armour_data;
-//                armour_data.armour_rect = cv::RotatedRect(tmp_armour_vec[min_idx].armour_rect);
-//                armour_data.armour_PL = cv::Point2f (tmp_armour_vec[min_idx].v_Pts_L);
-//                armour_data.armour_PR = cv::Point2f (tmp_armour_vec[min_idx].v_Pts_R);
-//                mArmour_queue.lock();
-//                if(armour_queue.size()>2)
-//                    armour_queue.pop();
-//                armour_queue.push(make_pair(time_stamp,armour_data));
-//                mArmour_queue.unlock();
-//            }else{
-//                continue;
-//            }
-//        }
         auto end = chrono::steady_clock::now();
         double cost = chrono::duration<double, milli>(end - start).count();
         cout << " armour sort cost " << cost << " ms" << endl;
@@ -581,7 +545,6 @@ chrono::time_point<chrono::steady_clock> last_t;
 void Armour::armour_tracking() {
     last_t = chrono::steady_clock::now();
     while (true) {
-
         /**creat searching ROI **/
         auto t0 = chrono::steady_clock::now();
         vector<Tmp_armour> armour_vec;
@@ -602,9 +565,24 @@ void Armour::armour_tracking() {
                 target_armour.armour_rect = armour_vec[0].armour_rect;
                 target_armour.armour_PL = armour_vec[0].v_Pts_L;
                 target_armour.armour_PR = armour_vec[0].v_Pts_R;
-//                select_id = armour_vec[0].id;
-//                armour_queue.push(make_pair(time_stamp, target_armour));
-//                id_locked = true;
+                target_armour.id = armour_vec[0].id;
+                select_id = armour_vec[0].id;
+                if(select_id == last_id){
+                    id_cnt ++;
+                    tmp_losing = 0;
+                }else {
+                    tmp_losing ++ ;
+                    if(tmp_losing > 5){
+                        id_cnt = 0;
+                    }
+                }
+                last_id = select_id;
+                if(id_cnt){
+                    id_locked = true;
+                    tmp_losing = 0;
+                    id_cnt = 0;
+                    std::cout<<"id locked !!"<<std::endl;
+                }
             } else if (armour_vec.size() > 1) {
                 if (!id_locked) {
                     double min_dis = 10000;
@@ -621,19 +599,24 @@ void Armour::armour_tracking() {
                         target_armour.armour_rect = cv::RotatedRect(armour_vec[min_idx].armour_rect);
                         target_armour.armour_PL = cv::Point2f(armour_vec[min_idx].v_Pts_L);
                         target_armour.armour_PR = cv::Point2f(armour_vec[min_idx].v_Pts_R);
+                        target_armour.id = int(armour_vec[min_idx].id);
                         select_id = armour_vec[min_idx].id;
                         if(select_id == last_id){
                             id_cnt ++;
-                        }else{
-                            id_cnt = 0;
+                            tmp_losing = 0;
+                        }else {
+                            tmp_losing ++ ;
+                            if(tmp_losing > 5){
+                                id_cnt = 0;
+                            }
                         }
                         last_id = select_id;
-                        if(id_cnt > 3){
+                        if(id_cnt){
                             id_locked = true;
+                            tmp_losing = 0;
+                            id_cnt = 0;
+                            std::cout<<"id locked !!"<<std::endl;
                         }
-//                        std::cout<<"tmpppppppppppppppppp "<<armour_vec[min_idx].id;
-//                        id_locked = true;
-//                        armour_queue.push(make_pair(time_stamp, target_armour));
                     }
                 } else {//tracking
                     double lose_count = 0;
@@ -642,6 +625,7 @@ void Armour::armour_tracking() {
                             target_armour.armour_rect = armour_data.armour_rect;
                             target_armour.armour_PL = armour_data.v_Pts_L;
                             target_armour.armour_PR = armour_data.v_Pts_R;
+                            target_armour.id = armour_data.id;
                             tracking_cnt++;
                             std::cout << "tracking id " << select_id << std::endl;
                             losing_cnt = 0;
@@ -653,31 +637,22 @@ void Armour::armour_tracking() {
                         losing_cnt++;
 //                        target_armour = armour_queue.back().second;
                     }
+                    if (losing_cnt > 20) {
+                        id_locked = false;
+                        select_id = -1;
+                        last_id = 0;
+                        id_cnt = 0;
+                        tracking_cnt = 0;
+                    }
                 }
             }
         }
-        if (losing_cnt > 20) {
-            id_locked = false;
-            select_id = -1;
-            last_id = 0;
-            tracking_cnt = 0;
-        }
-
-//        mArmour_queue.lock();
-//        if (armour_queue.size()>0){
-//            target_armour = armour_queue.front().second;
-//            time_stamp = armour_queue.front().first;
-//            armour_queue.pop();
-//            std::cout<<"armour queue size "<<armour_queue.size()<<std::endl;
-//        }
-//        mArmour_queue.unlock();
         double angle_P, angle_Y, Dis;
         char cmd = 0x30;
         /// select armour is real
         if (target_armour.armour_PL.x > 0) {
             cmd = 0x31;
             frame_cnt++;
-//            std::cout << "find armour !!!" << std::endl;
             Point2f corPoints[4];
             target_armour.armour_rect.points(corPoints);
             float armour_width = sqrt(
@@ -692,24 +667,25 @@ void Armour::armour_tracking() {
             float wh_rate = armour_width / armour_height;
             auto camPoint = getCamCoordinate(target_armour.armour_PL, target_armour.armour_PR, wh_rate);
             auto pixelPoint = cam2pixel(camPoint);
-
 //            std::cout<<"============================= abs "<<world_point<<std::endl;
 #ifdef USE_PRE
             Ptz_infor use_stm;
-            if(!ekf->inited){
+            if(!ekf->is_inited){
                 current_yaw = stm.yaw;
             }
             use_stm.yaw = stm.yaw - current_yaw;
             use_stm.pitch = stm.pitch;
             use_stm.bulletSpeed = stm.bulletSpeed;
             auto world_point = angleSolver->cam2abs(camPoint, use_stm);
-            std::cout<<"prepreper" <<time_stamp<<std::endl;
-            auto pre_abs = ekf->predict(world_point,time_stamp);
+            target_armour.world_point = world_point;
+//            std::cout<<"prepreper" <<target_armour.id<<std::endl;
+            Armour_case a;
+            a.world_point = target_armour.world_point;
+            a.id = target_armour.id;
+            auto pre_abs = ekf->predict(a,time_stamp);
             auto pre_cam = angleSolver->abs2cam(pre_abs,use_stm);
             auto pre_pixel = cam2pixel(pre_cam);
             angleSolver->getAngle(pre_cam,angle_P,angle_Y,Dis);
-//            auto pre_cam = angleSolver->abs2cam(pre_abs,stm);
-//            auto prepixel = cam2pixel(pre_cam);
 #else
             angleSolver->getAngle(camPoint,angle_P,angle_Y,Dis);
             auto world_point = angleSolver->cam2abs(camPoint,stm);
@@ -734,8 +710,6 @@ void Armour::armour_tracking() {
 //            putText(src, "abs_pitch "+to_string(abs_pitch),Point2f(400,70),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
             putText(src,"world point "+ to_string(world_point.x)+" "+ to_string(world_point.y)+" "+ to_string(world_point.z),Point2f(0,90),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0));
 #ifdef USE_PRE
-
-
             circle(src,pixelPoint,20,Scalar(0,0,255),-1);
             circle(src,pre_pixel,20,Scalar(0,255,0),-1);
 #endif
@@ -755,7 +729,7 @@ void Armour::armour_tracking() {
             last_t = t2;
         }
 
-        cv::waitKey(2);
+        cv::waitKey(4);
         *(signed char *) &port.buff_w_[0] = int16_t(10000 * (angle_P));
         *(signed char *) &port.buff_w_[1] = int16_t((10000 * (angle_P))) >> 8;
         *(signed char *) &port.buff_w_[2] = int16_t(10000 * (angle_Y));
@@ -763,7 +737,6 @@ void Armour::armour_tracking() {
         *(signed char *) &port.buff_w_[4] = int16_t(100 * Dis);
         *(signed char *) &port.buff_w_[5] = int16_t(100 * Dis) >> 8;
         port.SendBuff(cmd, port.buff_w_, 6);
-
         auto t1 = chrono::steady_clock::now();
         double cost = chrono::duration<double, milli>(t1 - t0).count();
         std::cout << "armour tracking thread cost " << cost << " ms" << std::endl;

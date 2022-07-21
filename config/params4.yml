@@ -3,11 +3,11 @@
 armour:
   debug: 0
   red_spilt_threshold: 85
-  red_gray_threshold: 94
-  red_green_threshold: 164
-  blue_spilt_threshold: 95
-  blue_gray_threshold: 140
-  blue_green_threshold: 100
+  red_gray_threshold: 120
+  red_green_threshold: 106
+  blue_spilt_threshold: 80
+  blue_gray_threshold: 188
+  blue_green_threshold: 60
   light_contour_min: 15
 
 energy:
@@ -24,12 +24,12 @@ energy:
   area_rate_max: 0.6
 
 base:
-  simple_pitch_diff: 0.005
-  simple_yaw_diff: -0.021
-  sentry_pitch_diff: 0.003
-  sentry_yaw_diff: -0.021
-  buff_pitch_diff: -0.01
-  buff_yaw_diff: 0.025
+  simple_pitch_diff: 0.019
+  simple_yaw_diff: -0.010
+  sentry_pitch_diff: 0.00
+  sentry_yaw_diff: 0.001
+  buff_pitch_diff: -0.0
+  buff_yaw_diff: 0.0
 
 ekf:
   # predict

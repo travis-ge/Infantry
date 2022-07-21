@@ -8,7 +8,10 @@
 #include <opencv2/opencv.hpp>
 #include "AdaptiveEKF.hpp"
 #include "common.h"
-
+struct Armour_case{
+    cv::Point3f world_point;
+    int id;
+};
 struct Predict {
     /*
      * 此处定义匀速直线运动模型  x1 = x0+v*delta_t
@@ -52,13 +55,13 @@ struct Measure {
 class EKFPredictor {
 private:
     AdaptiveEKF<5, 3> ekf;  // 创建ekf
+    std::deque<Armour_case> armour_seq;
     double last_time;
-
     double last_dis = 0;
-    bool antitop = false;
+    bool is_anti = false;
 
 public:
-    bool inited = false;
+    bool is_inited = false;
     inline void load_param(bool update_all = true) {
         cv::FileStorage fin(Param, cv::FileStorage::READ);
         fin["ekf"]["Q00"] >> ekf.Q(0, 0);
@@ -81,7 +84,7 @@ public:
     }
     ~EKFPredictor() = default;
 
-    cv::Point3f predict(cv::Point3f world_point, double t);
+    cv::Point3f predict(Armour_case  &armour, double t);
 
 };
 

@@ -24,6 +24,7 @@ struct Armour_data{
     cv::Point2f armour_PL;
     cv::Point2f armour_PR;
     int id;
+    cv::Point3f world_point;
 };
 //#define SHOW_IMG
 class Armour {
@@ -55,6 +56,7 @@ public:
     uint8_t debug;
     queue<pair<double,Armour_data>> armour_queue;
     Rect tracking_roi ;
+    cv::Point2f roi_pl;
 private:
     bool p_is_inited = false;
     Mat src,src_gray, src_separation, src_green;
@@ -68,6 +70,7 @@ private:
     double last_abs = 0;
     int tracking_cnt = 0;
     int losing_cnt = 0;
+    int tmp_losing = 0;
     int r_spilt_threshold;
     int r_gray_threshold;
     int r_green_threshold;
