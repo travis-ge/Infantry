@@ -29,22 +29,20 @@ struct Armour_data{
 //#define SHOW_IMG
 class Armour {
 public:
-
     Armour();
     ~Armour();
-
     bool readCameraParameters(string filename);
-    void img_pretreatment(const cv::Mat &src, cv::Mat &dst, int team);
-    bool Armor_Detector(const cv::Mat &src, double time_stamp);
-    void armourSort();
+    void imgPretreatment(const cv::Mat &src, cv::Mat &dst, int team);
+    bool armourDetector(const cv::Mat &src);
+    bool armourSort(void);
     Point3f getCamCoordinate(cv::Point2f &tg_pt_L, cv::Point2f &tg_pt_R, float wh_rate);
-
     void draw_target(RotatedRect rect, Mat &src);
 
     bool ifShoot(double angle_p,double angle_y);
     cv::Point2f cam2pixel(cv::Point3f camPoint);
     void armour_imgProcess();
-    void armour_tracking();
+    void armour_tracking(void);
+    [[noreturn]]void run();
     ///
     cv::Mat camMatrix;
     cv::Mat distCoeffs;
@@ -52,14 +50,14 @@ public:
     std::vector<cv::Point2f> observationPts;
     cv::Point2f tg_center;
     double cx,cy,fx,fy;
-    cv::Point3f m_position;               //三维坐标信息
     uint8_t debug;
     queue<pair<double,Armour_data>> armour_queue;
     Rect tracking_roi ;
     cv::Point2f roi_pl;
 private:
-    bool p_is_inited = false;
+    double time_stamp;
     Mat src,src_gray, src_separation, src_green;
+    Mat roi;
     std::vector<cv::Mat> src_split_;
     vector<Tmp_armour> tmp_armour_vec;
     queue<pair<double,cv::Mat>> imgProcessed_queue;
@@ -68,12 +66,19 @@ private:
     int select_id = 0;
     int id_cnt = 0;
     double last_abs = 0;
-    int tracking_cnt = 0;
+    int track_cnt = 0;
     int losing_cnt = 0;
+    int id_losing_cnt = 0;
     int tmp_losing = 0;
     int r_spilt_threshold;
     int r_gray_threshold;
     int r_green_threshold;
+    int tracking_flag = 0;
+    int find_cnt = 0;
+    double fps_cnt = 0;
+    uint8_t roi_ready = 0;
+    int tracking_cnt = 0;
+    cv::Rect armourROI = {0,0,0,0};
 
     int b_spilt_threshold;
     int b_gray_threshold;

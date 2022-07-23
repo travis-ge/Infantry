@@ -12,7 +12,7 @@ cv::Point3f EKFPredictor::predict(Armour_case &armour, double t) {
     double shoot_delay = 0.1;
     double dis = sqrt(pow(armour.world_point.x,2)+ pow(armour.world_point.y,2)+ pow(armour.world_point.z,2));
 
-    if(fabs(dis - last_dis) > 0.15 || (t - last_time) > 1 || armour.id != (armour_seq.end()-1)->id){
+    if(fabs(dis - last_dis) > 0.15 || (t - last_time) > 1){
         is_inited = false;
         std::cout<<"target changed ,ekf re init !!!!! "<<"dis diff "<<fabs(dis-last_dis)<<
         " t diff "<<t - last_time<<std::endl;

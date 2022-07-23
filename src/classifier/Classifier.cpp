@@ -300,7 +300,7 @@ int Classifier::numPredict(cv::Mat &src) {
    // }
 
     int i = (int)Probability - 1;
-    if(a[i]>0.6){
+    if(a[i]>0.5){
         predictValue = Probability;
         std::cout<<"识别数字："<<Probability<<"      概率:"<<a[i]<<std::endl;
     }else{

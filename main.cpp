@@ -14,19 +14,9 @@ std::chrono::time_point<std::chrono::steady_clock> start_time;
 SerialPort port;
 Ptz_infor stm;
 
-Armour armour;
-[[noreturn]] void armour_imgProcess(){
-    armour.armour_imgProcess();
-}
-[[noreturn]] void armour_sort(){
-    armour.armourSort();
-}
-[[noreturn]] void armour_tracking(){
-    armour.armour_tracking();
-}
-
 int main() {
     start_time = chrono::steady_clock::now();
+    Armour armour;
     GX_STATUS status = Config();
     if (status != GX_STATUS_SUCCESS) {
         std::cout << "config Camera Faile ..." << std::endl;
@@ -49,16 +39,11 @@ int main() {
     }
     while (!port.PortInit(0, 115200));
     std::thread serial_receive_thread(port_receive);
-    std::thread armour_detect_thread(armour_imgProcess);
-#ifndef SHOW_DST
-    std::thread armour_sort_thread(armour_sort);
-    std::thread armour_tracking_tread(armour_tracking);
-#endif
+    std::thread armour_auto_shoot(&Armour::run,armour);
+//    std::thread armour_auto_shoot(aaaa);
     serial_receive_thread.join();
-    armour_detect_thread.join();
-#ifndef SHOW_DST
-    armour_sort_thread.join();
-    armour_tracking_tread.join();
-#endif
+    armour_auto_shoot.join();
+
+
     return 0;
 }

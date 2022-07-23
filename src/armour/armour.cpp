@@ -41,7 +41,6 @@ Armour::Armour() {
     fs1["armour"]["debug"] >> debug;
     fs1["armour"]["light_contour_min"] >> light_contour_min;
     fs1.release();
-    tracking_roi = Rect(0,0,0,0);
     numClass = make_shared<Classifier>();
     angleSolver = make_shared<AngleSolver>();
     ekf = make_shared<EKFPredictor>();
@@ -73,7 +72,7 @@ bool Armour::readCameraParameters(string filename) {
 // * @param dst
 // * @param team
 // */
-void Armour::img_pretreatment(const cv::Mat &src, cv::Mat &dst, int team) {
+void Armour::imgPretreatment(const cv::Mat &src, cv::Mat &dst, int team) {
     cv::split(src, src_split_);
     cv::cvtColor(src, src_gray, CV_BGR2GRAY);
     if (debug) {
@@ -131,8 +130,8 @@ void Armour::img_pretreatment(const cv::Mat &src, cv::Mat &dst, int team) {
  * @param src
  * @return
  */
-bool Armour::Armor_Detector(const Mat &src, double time_stamp) {
-    tmp_armour_vec.clear();
+bool Armour::armourDetector(const Mat &src) {
+    tmp_armour_vec.clear(); // all armour vector
     cv::RotatedRect lightBar, lightBar_fitEllipse, lightBar_minAreaRect;
     std::vector<cv::RotatedRect> v_lightBar;
     Mat src_contours;
@@ -198,8 +197,7 @@ bool Armour::Armor_Detector(const Mat &src, double time_stamp) {
                 /*lightBar_dis / v_lightBar[i].size.height >0.5 &&*/
                 height_diff / height_max < 0.3 &&
                 width_diff / width_sum < 0.4 &&
-                X_diff / MH_diff > 2)//还可以加入高度差限制
-            {
+                X_diff / MH_diff > 2) {
                 tmp_armour.armour_rect.center.x = ((v_lightBar[i].center.x + v_lightBar[j].center.x) / 2);
                 tmp_armour.armour_rect.center.y = ((v_lightBar[i].center.y + v_lightBar[j].center.y) / 2);
                 tmp_armour.armour_rect.angle = (v_lightBar[i].angle + v_lightBar[j].angle) / 2;
@@ -231,14 +229,8 @@ bool Armour::Armor_Detector(const Mat &src, double time_stamp) {
             }
         }
     }
+    ///check if vector is empty!
     if (tmp_armour_vec.size() > 0) {
-//        mTmp_armour_queue.lock();
-//        if(tmp_armour_queue.size()>5){
-//            tmp_armour_queue.pop();
-//        }
-//        tmp_armour_queue.push(make_pair(time_stamp,tmp_armour_vec));
-//        std::cout<<"tmp armour queue size "<<tmp_armour_queue.size()<<std::endl;
-//        mTmp_armour_queue.unlock();
         return true;
     } else
         return false;
@@ -299,7 +291,6 @@ Point3f Armour::getCamCoordinate(Point2f &tg_pt_L, Point2f &tg_pt_R, float wh_ra
     double Y = tvec.at<double>(1, 0);
 //    double X = (tg_center.x - cx) * Z / fx ;
 //    double Y = (tg_center.y - cy) * Z / fy ;
-    m_position = Point3f(X, Y, Z);
     return Point3f(X, Y, Z);
 }
 
@@ -339,83 +330,8 @@ bool Armour::ifShoot(double angle_p, double angle_y) {
     else
         return false;
 }
-/**
- * 1th
- */
+
 #define K_SPEED 10000
-void Armour::armour_imgProcess() {
-    if (!readCameraParameters(cameraParam)) {
-        std::cout << "read camera param fail ..." << std::endl;
-    }
-    auto start_time = chrono::steady_clock::now();
-    int img_cnt = 0;
-    while (true) {
-        std::chrono::time_point<std::chrono::steady_clock> t1;
-        cv::Mat img;
-        double time_stamp;
-        mImg_buf.lock();
-        if (img_buf.size() > 0) {
-            std::cout << "img buff " << img_buf.size() << std::endl;
-            t1 = img_buf.front().first;
-            time_stamp = chrono::duration<double>(t1 - start_time).count();//s
-//            std::cout<<"time stamp "<<time_stamp<<std::endl;
-            mSrc.lock();
-            src = img_buf.front().second.clone();
-            mSrc.unlock();
-            img_buf.pop();
-        }
-        mImg_buf.unlock();
-        mSrc.lock();
-        if (!src.data) {
-            mSrc.unlock();
-            continue;
-        }
-        mSrc.unlock();
-
-        auto start = chrono::steady_clock::now();
-        uint8_t find_color_armour = 2;
-        if (port.receive[4] > K_SPEED) {   /// 我方是蓝色，击打红色
-            find_color_armour = 2;
-//            std::cout << "our team is blue, shoot red!!" << std::endl;
-        }
-        if (port.receive[4] < K_SPEED) {
-            find_color_armour = 1;
-//            std::cout << "our team is red, shoot blue!!" << std::endl;
-        }
-        cv::Mat dst;
-        STATE mode = getMode(port.receive[1]);
-        switch (mode) {
-            case STATE_BUFF:;
-                break;
-            default: {
-                mSrc.lock();
-                img_pretreatment(src, dst, find_color_armour);
-#ifdef WRITE_IMG
-                char key = cv::waitKey(30);
-                if( key == 's'){
-                    img_cnt++;
-                    cv::imwrite(PROJECT_DIR"/data/"+ to_string(img_cnt)+".jpg",src);
-                    std::cout<<"img idx ========================="<<to_string(img_cnt)<<std::endl;
-
-                }
-                mSrc.unlock();
-                imshow("picture",src);
-                cv::waitKey(1);
-                continue;
-#endif
-                mSrc.unlock();
-                mDst_queue.lock();
-                if (imgProcessed_queue.size() > 2)
-                    imgProcessed_queue.pop();
-                imgProcessed_queue.push(make_pair(time_stamp, dst));
-                mDst_queue.unlock();
-            }
-        }
-        auto end = chrono::steady_clock::now();
-        double cost = chrono::duration<double, milli>(end - start).count();
-//        cout << " armour detect cost " << cost << " ms" << endl;
-    }
-}
 
 /**
  *2th
@@ -424,113 +340,73 @@ void Armour::armour_imgProcess() {
  * @param P_r
  * @return
  */
-void Armour::armourSort() {
-    while (true) {
-        auto start = chrono::steady_clock::now();
-        double time_stamp;
-        mDst_queue.lock();
-        if (imgProcessed_queue.size() == 0) {
-            mDst_queue.unlock();
-            continue;
+bool Armour::armourSort(void) {
+    if (tmp_armour_vec.size() == 0) { return false; }
+    for (auto i = tmp_armour_vec.begin(); i != tmp_armour_vec.end();) {
+        /*cut number area*/
+        Point2f srcRect[4], dstRect[4], P[4];
+        i->armour_rect.points(P);
+        //矫正长宽
+        float width = tool::getDistance(P[0], P[1]);
+        float height = tool::getDistance(P[1], P[2]);
+        if (width > height) {
+            srcRect[0] = P[0];
+            srcRect[1] = P[1];
+            srcRect[2] = P[2];
+            srcRect[3] = P[3];
+        } else {
+            swap(width, height);
+            srcRect[0] = P[1];
+            srcRect[1] = P[2];
+            srcRect[2] = P[3];
+            srcRect[3] = P[0];
         }
-        cv::Mat dst;
-        dst = imgProcessed_queue.front().second.clone();
-        time_stamp = imgProcessed_queue.front().first;
-        imgProcessed_queue.pop();
-        mDst_queue.unlock();
-        Armor_Detector(dst, time_stamp);
-//        vector<Tmp_armour> armour_seq;
-//        mTmp_armour_queue.lock();
-////        std::cout<<"sort tmp armour size "<<tmp_armour_queue.size()<<std::endl;
-//        if(tmp_armour_queue.size()>0){
-//            std::cout<<"tmp_armour_queue size "<<tmp_armour_queue.size()<<std::endl;
-//            time_stamp = tmp_armour_queue.front().first;
-//            armour_seq = tmp_armour_queue.front().second;
-//            tmp_armour_queue.pop();
-//        }else{
-//            mTmp_armour_queue.unlock();
-//            continue;
-//        }
-//        mTmp_armour_queue.unlock();
-        if (tmp_armour_vec.size() == 0) { continue; }
-        for (auto i = tmp_armour_vec.begin(); i != tmp_armour_vec.end();) {
-            /*cut number area*/
-            Point2f srcRect[4], dstRect[4], P[4];
-            i->armour_rect.points(P);
-            //矫正长宽
-            float width = tool::getDistance(P[0], P[1]);
-            float height = tool::getDistance(P[1], P[2]);
-            if (width > height) {
-                srcRect[0] = P[0];
-                srcRect[1] = P[1];
-                srcRect[2] = P[2];
-                srcRect[3] = P[3];
-            } else {
-                swap(width, height);
-                srcRect[0] = P[1];
-                srcRect[1] = P[2];
-                srcRect[2] = P[3];
-                srcRect[3] = P[0];
-            }
-            if ((srcRect[0].y > srcRect[3].y) && (srcRect[0].x > srcRect[1].x)) {
-                swap(srcRect[0], srcRect[2]);
-                swap(srcRect[1], srcRect[3]);
-            }
-            float scale_x = 0.2;
-            float scale_y = 0.6;
-            //高度上,默认放大
-            srcRect[0].y -= height * scale_y;
-            srcRect[1].y -= height * scale_y;
-            srcRect[3].y += height * scale_y;
-            srcRect[2].y += height * scale_y;
-            //宽度上，默认缩小
-            srcRect[0].x += width * scale_x;
-            srcRect[1].x -= width * scale_x;
-            srcRect[3].x += width * scale_x;
-            srcRect[2].x -= width * scale_x;
-            //按照顺序存入目标矩形点坐标
-            dstRect[0] = Point2f(0, 0);
-            dstRect[1] = Point2f(width, 0);
-            dstRect[2] = Point2f(width, height);
-            dstRect[3] = Point2f(0, height);
-            Mat transform = getPerspectiveTransform(srcRect, dstRect);
-            Mat src1;
-            mSrc.lock();
+        if ((srcRect[0].y > srcRect[3].y) && (srcRect[0].x > srcRect[1].x)) {
+            swap(srcRect[0], srcRect[2]);
+            swap(srcRect[1], srcRect[3]);
+        }
+        float scale_x = 0.2;
+        float scale_y = 0.6;
+        //高度上,默认放大
+        srcRect[0].y -= height * scale_y;
+        srcRect[1].y -= height * scale_y;
+        srcRect[3].y += height * scale_y;
+        srcRect[2].y += height * scale_y;
+        //宽度上，默认缩小
+        srcRect[0].x += width * scale_x;
+        srcRect[1].x -= width * scale_x;
+        srcRect[3].x += width * scale_x;
+        srcRect[2].x -= width * scale_x;
+        //按照顺序存入目标矩形点坐标
+        dstRect[0] = Point2f(0, 0);
+        dstRect[1] = Point2f(width, 0);
+        dstRect[2] = Point2f(width, height);
+        dstRect[3] = Point2f(0, height);
+        Mat transform = getPerspectiveTransform(srcRect, dstRect);
+        Mat src1;
+        if(roi_ready){
+            warpPerspective(roi, src1, transform, Size(width, height));
+            std::cout<<"roi ready "<<std::endl;
+        }else
             warpPerspective(src, src1, transform, Size(width, height));
-            mSrc.unlock();
 //        imshow("warp after", src1);
-            int num = -1;
-            ///recognize number
-            num = numClass->numPredict(src1);
-            if (num < 1) {
-                i = tmp_armour_vec.erase(i);
-#ifdef SHOW_IMG
-                putText(src, "0",tmp_rect.tl(),FONT_HERSHEY_COMPLEX_SMALL,2,Scalar(255,0,0),2);
-#endif
-                continue;
-            } else {
-                i->id = num;
-                ++i; // with right id (pl rl id )
-            }
-#ifdef SHOW_IMG
-            putText(src, to_string(num),tmp_rect.tl(),FONT_HERSHEY_COMPLEX_SMALL,2,Scalar(255,0,0),2);
-#endif
-        }
-        if (tmp_armour_vec.size() == 0) {
+//        cv::waitKey(1);
+        int num = -1;
+        ///recognize number
+        num = numClass->numPredict(src1);
+        if (num < 1) {
+            i = tmp_armour_vec.erase(i);
             continue;
         } else {
-            mTmp_armour_queue.lock();
-            if (tmp_armour_queue.size() > 2) {
-                tmp_armour_queue.pop();
-            }
-            tmp_armour_queue.push(make_pair(time_stamp, tmp_armour_vec));
-            mTmp_armour_queue.unlock();
+            i->id = num;
+            ++i; // with right id (pl rl id )
         }
-        auto end = chrono::steady_clock::now();
-        double cost = chrono::duration<double, milli>(end - start).count();
-        cout << " armour sort cost " << cost << " ms" << endl;
     }
-
+    if (tmp_armour_vec.size() == 0) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 /**
@@ -542,205 +418,305 @@ chrono::time_point<chrono::steady_clock> last_t;
 #define USE_PRE
 //#define SHOW_IMG
 
-void Armour::armour_tracking() {
+void Armour::armour_tracking(void) {
+
     last_t = chrono::steady_clock::now();
-    while (true) {
-        /**creat searching ROI **/
-        auto t0 = chrono::steady_clock::now();
-        vector<Tmp_armour> armour_vec;
-        double time_stamp;
-        int tg_num = 0;
-        if (tmp_armour_queue.size() > 0) {
-            mTmp_armour_queue.lock();
-            armour_vec = tmp_armour_queue.front().second;
-            time_stamp = tmp_armour_queue.front().first;
-            tg_num = armour_vec.size();
-            tmp_armour_queue.pop();
-            mTmp_armour_queue.unlock();
-        }
-        Armour_data target_armour;
-        target_armour.armour_PL = Point2f(-1, -1);
-        if (tg_num) {
-            if (armour_vec.size() == 1) {
-                target_armour.armour_rect = armour_vec[0].armour_rect;
-                target_armour.armour_PL = armour_vec[0].v_Pts_L;
-                target_armour.armour_PR = armour_vec[0].v_Pts_R;
-                target_armour.id = armour_vec[0].id;
-                select_id = armour_vec[0].id;
-                if(select_id == last_id){
-                    id_cnt ++;
-                    tmp_losing = 0;
-                }else {
-                    tmp_losing ++ ;
-                    if(tmp_losing > 5){
-                        id_cnt = 0;
+    /**creat searching ROI **/
+    int tg_num = 0;
+    double angle_P, angle_Y, Dis;
+    char cmd = 0x30;
+    Armour_data target_armour;
+    target_armour.armour_PL = Point2f(-1, -1);
+    if (tmp_armour_vec.size()) { tg_num = tmp_armour_vec.size(); }
+    std::cout<<"tg_num "<<tg_num<<std::endl;
+    if (tg_num) {
+        if (tmp_armour_vec.size() == 1) {
+            target_armour.armour_rect = tmp_armour_vec[0].armour_rect;
+            target_armour.armour_PL = tmp_armour_vec[0].v_Pts_L;
+            target_armour.armour_PR = tmp_armour_vec[0].v_Pts_R;
+            target_armour.id = tmp_armour_vec[0].id;
+//            select_id = tmp_armour_vec[0].id;
+//            if (select_id == last_id) {
+//                id_cnt++;
+//                tmp_losing = 0;
+//            } else {
+//                tmp_losing++;
+//                if (tmp_losing > 5) {
+//                    id_cnt = 0;
+//                }
+//            }
+//            last_id = select_id;
+//            if (id_cnt) {
+//                id_locked = true;
+//                tmp_losing = 0;
+//                id_cnt = 0;
+//                std::cout << "id locked !!" << std::endl;
+//            }
+        } else if (tmp_armour_vec.size() > 1) {
+            if (!id_locked) {
+                double min_dis = 10000;
+                int min_idx = -1;
+                for (int i = 0; i < tmp_armour_vec.size(); i++) {
+                    double dis = fabs(tmp_armour_vec[i].armour_rect.center.x - src.cols / 2) +
+                                 fabs(tmp_armour_vec[i].armour_rect.center.y - src.rows / 2);
+                    if (dis < min_dis) {
+                        min_dis = dis;
+                        min_idx = i;
                     }
                 }
-                last_id = select_id;
-                if(id_cnt){
-                    id_locked = true;
-                    tmp_losing = 0;
-                    id_cnt = 0;
-                    std::cout<<"id locked !!"<<std::endl;
-                }
-            } else if (armour_vec.size() > 1) {
-                if (!id_locked) {
-                    double min_dis = 10000;
-                    int min_idx = -1;
-                    for (int i = 0; i < armour_vec.size(); i++) {
-                        double dis = fabs(armour_vec[i].armour_rect.center.x - src.cols / 2) +
-                                     fabs(armour_vec[i].armour_rect.center.y - src.rows / 2);
-                        if (dis < min_dis) {
-                            min_dis = dis;
-                            min_idx = i;
-                        }
-                    }
-                    if (min_dis > 0) {
-                        target_armour.armour_rect = cv::RotatedRect(armour_vec[min_idx].armour_rect);
-                        target_armour.armour_PL = cv::Point2f(armour_vec[min_idx].v_Pts_L);
-                        target_armour.armour_PR = cv::Point2f(armour_vec[min_idx].v_Pts_R);
-                        target_armour.id = int(armour_vec[min_idx].id);
-                        select_id = armour_vec[min_idx].id;
-                        if(select_id == last_id){
-                            id_cnt ++;
-                            tmp_losing = 0;
-                        }else {
-                            tmp_losing ++ ;
-                            if(tmp_losing > 5){
-                                id_cnt = 0;
-                            }
-                        }
-                        last_id = select_id;
-                        if(id_cnt){
-                            id_locked = true;
-                            tmp_losing = 0;
+                if (min_dis > 0) {
+                    target_armour.armour_rect = cv::RotatedRect(tmp_armour_vec[min_idx].armour_rect);
+                    target_armour.armour_PL = cv::Point2f(tmp_armour_vec[min_idx].v_Pts_L);
+                    target_armour.armour_PR = cv::Point2f(tmp_armour_vec[min_idx].v_Pts_R);
+                    target_armour.id = int(tmp_armour_vec[min_idx].id);
+                    select_id = tmp_armour_vec[min_idx].id;
+                    if (select_id == last_id) {
+                        id_cnt++;
+                        tmp_losing = 0;
+                    } else {
+                        tmp_losing++;
+                        if (tmp_losing > 5) {
                             id_cnt = 0;
-                            std::cout<<"id locked !!"<<std::endl;
                         }
                     }
-                } else {//tracking
-                    double lose_count = 0;
-                    for (auto &armour_data: armour_vec) {
-                        if (armour_data.id == select_id) {
-                            target_armour.armour_rect = armour_data.armour_rect;
-                            target_armour.armour_PL = armour_data.v_Pts_L;
-                            target_armour.armour_PR = armour_data.v_Pts_R;
-                            target_armour.id = armour_data.id;
-                            tracking_cnt++;
-                            std::cout << "tracking id " << select_id << std::endl;
-                            losing_cnt = 0;
-                            break;
-                        }
-                        lose_count++;
-                    }
-                    if (lose_count == armour_vec.size()) {
-                        losing_cnt++;
-//                        target_armour = armour_queue.back().second;
-                    }
-                    if (losing_cnt > 20) {
-                        id_locked = false;
-                        select_id = -1;
-                        last_id = 0;
+                    last_id = select_id;
+                    if (id_cnt) {
+                        id_locked = true;
+                        tmp_losing = 0;
                         id_cnt = 0;
-                        tracking_cnt = 0;
+                        std::cout << "id locked !!" << std::endl;
                     }
+                }
+            } else {//tracking
+                double lose_count = 0;
+                for (auto &armour_data: tmp_armour_vec) {
+                    if (armour_data.id == select_id) {
+                        target_armour.armour_rect = armour_data.armour_rect;
+                        target_armour.armour_PL = armour_data.v_Pts_L;
+                        target_armour.armour_PR = armour_data.v_Pts_R;
+                        target_armour.id = armour_data.id;
+                        track_cnt++;
+                        std::cout << "tracking id " << select_id << std::endl;
+                        id_losing_cnt = 0;
+                        break;
+                    }
+                    lose_count++;
+                }
+                if (lose_count == tmp_armour_vec.size()) {
+                    id_losing_cnt++;
+//                        target_armour = armour_queue.back().second;
+                }
+                if (id_losing_cnt > 20) {
+                    id_locked = false;
+                    select_id = -1;
+                    last_id = 0;
+                    id_cnt = 0;
+                    track_cnt = 0;
                 }
             }
         }
-        double angle_P, angle_Y, Dis;
-        char cmd = 0x30;
-        /// select armour is real
-        if (target_armour.armour_PL.x > 0) {
-            cmd = 0x31;
-            frame_cnt++;
-            Point2f corPoints[4];
-            target_armour.armour_rect.points(corPoints);
-            float armour_width = sqrt(
-                    pow(corPoints[0].x - corPoints[1].x, 2) + pow(corPoints[0].y - corPoints[1].y, 2));
-            float armour_height = sqrt(
-                    pow(corPoints[1].x - corPoints[2].x, 2) + pow(corPoints[1].y - corPoints[2].y, 2));
-            if (armour_height > armour_width) {
-                float tmp = armour_width;
-                armour_width = armour_height;
-                armour_height = tmp;
+    }else{
+        cmd = 0x30;
+        angle_Y = angle_P = Dis = 0;
+        losing_cnt++;
+    }
+    /// select armour is real
+    if (target_armour.armour_PL.x > 0) {
+        find_cnt++;
+        if (roi_ready) {
+            //imshow("armour roi",img_process);
+            target_armour.armour_PL.x += armourROI.x;
+            target_armour.armour_PL.y += armourROI.y;
+            target_armour.armour_PR.x += armourROI.x;
+            target_armour.armour_PR.y += armourROI.y;
+            target_armour.armour_rect.center.x += armourROI.x;
+            target_armour.armour_rect.center.y += armourROI.y;
+        }
+        if (tracking_flag) {
+            cv::Rect tmpROI = target_armour.armour_rect.boundingRect();
+            int roi_x = tmpROI.x - 0.7 * tmpROI.width;
+            int roi_y = tmpROI.y - 0.5 * tmpROI.width;
+            int roi_w = 2.5 * tmpROI.width;
+            int roi_h = 2 * tmpROI.width;
+            if (roi_x < 0) { roi_x = 0; }
+            if (roi_y < 0) { roi_y = 0; }
+            if (roi_x + roi_w > src.cols) { roi_w = src.cols - roi_x; }
+            if (roi_y + roi_h > src.rows) { roi_h = src.rows - roi_y; }
+            armourROI = Rect(roi_x, roi_y, roi_w, roi_h);
+            rectangle(src,armourROI,Scalar(255,0,0),2);
+            if (armourROI.width > 0) {
+                roi_ready = 1;
             }
-            float wh_rate = armour_width / armour_height;
-            auto camPoint = getCamCoordinate(target_armour.armour_PL, target_armour.armour_PR, wh_rate);
-            auto pixelPoint = cam2pixel(camPoint);
+        }
+        cmd = 0x31;
+        frame_cnt++;
+        Point2f corPoints[4];
+        target_armour.armour_rect.points(corPoints);
+        float armour_width = sqrt(
+                pow(corPoints[0].x - corPoints[1].x, 2) + pow(corPoints[0].y - corPoints[1].y, 2));
+        float armour_height = sqrt(
+                pow(corPoints[1].x - corPoints[2].x, 2) + pow(corPoints[1].y - corPoints[2].y, 2));
+        if (armour_height > armour_width) {
+            float tmp = armour_width;
+            armour_width = armour_height;
+            armour_height = tmp;
+        }
+        float wh_rate = armour_width / armour_height;
+        auto camPoint = getCamCoordinate(target_armour.armour_PL, target_armour.armour_PR, wh_rate);
+        auto pixelPoint = cam2pixel(camPoint);
 //            std::cout<<"============================= abs "<<world_point<<std::endl;
 #ifdef USE_PRE
-            Ptz_infor use_stm;
-            if(!ekf->is_inited){
-                current_yaw = stm.yaw;
-            }
-            use_stm.yaw = stm.yaw - current_yaw;
-            use_stm.pitch = stm.pitch;
-            use_stm.bulletSpeed = stm.bulletSpeed;
-            auto world_point = angleSolver->cam2abs(camPoint, use_stm);
-            target_armour.world_point = world_point;
+        Ptz_infor use_stm;
+        if (!ekf->is_inited) {
+            current_yaw = stm.yaw;
+        }
+        use_stm.yaw = stm.yaw - current_yaw;
+        use_stm.pitch = stm.pitch;
+        use_stm.bulletSpeed = stm.bulletSpeed;
+        auto world_point = angleSolver->cam2abs(camPoint, use_stm);
+        target_armour.world_point = world_point;
 //            std::cout<<"prepreper" <<target_armour.id<<std::endl;
-            Armour_case a;
-            a.world_point = target_armour.world_point;
-            a.id = target_armour.id;
-            auto pre_abs = ekf->predict(a,time_stamp);
-            auto pre_cam = angleSolver->abs2cam(pre_abs,use_stm);
-            auto pre_pixel = cam2pixel(pre_cam);
-            angleSolver->getAngle(pre_cam,angle_P,angle_Y,Dis);
+        Armour_case a;
+        a.world_point = target_armour.world_point;
+        a.id = target_armour.id;
+        auto pre_abs = ekf->predict(a, time_stamp);
+        auto pre_cam = angleSolver->abs2cam(pre_abs, use_stm);
+        auto pre_pixel = cam2pixel(pre_cam);
+        angleSolver->getAngle(pre_cam, angle_P, angle_Y, Dis);
 #else
-            angleSolver->getAngle(camPoint,angle_P,angle_Y,Dis);
-            auto world_point = angleSolver->cam2abs(camPoint,stm);
-            //            angleSolver->getAngle(camPoint,angle_P,angle_Y,Dis);
-            double abs_yaw = stm.yaw - angle_Y;
-            double abs_pitch = stm.pitch + angle_P;
+        angleSolver->getAngle(camPoint,angle_P,angle_Y,Dis);
+        auto world_point = angleSolver->cam2abs(camPoint,stm);
+        //            angleSolver->getAngle(camPoint,angle_P,angle_Y,Dis);
+        double abs_yaw = stm.yaw - angle_Y;
+        double abs_pitch = stm.pitch + angle_P;
 #endif
-            std::cout << " == ang_P " << angle_P
-                      << " == ang_Y " << angle_Y
-                      << " == Dis " << Dis
-                      << std::endl;
+        std::cout << " == ang_P " << angle_P
+                  << " == ang_Y " << angle_Y
+                  << " == Dis " << Dis
+                  << std::endl;
 #ifdef SHOW_IMG
-            //add thread mutex
-            mSrc.lock();
-            draw_target(target_armour.armour_rect,src);
-            putText(src, to_string(target_armour.id),target_armour.armour_rect.boundingRect().tl(),FONT_HERSHEY_COMPLEX_SMALL,1,(255,0,0),1);
-            putText(src, "cam_yaw "+to_string(angle_Y),Point2f(0,30),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
-            putText(src, "cam_pitch "+to_string(angle_P),Point2f(400,30),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
-            putText(src, "ptz_yaw "+to_string(stm.yaw),Point2f(0,50),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
-            putText(src, "ptz_pitch "+to_string(stm.pitch),Point2f(400,50),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
+        //add thread mutex
+        draw_target(target_armour.armour_rect,src);
+        putText(src, to_string(target_armour.id),target_armour.armour_rect.boundingRect().tl(),FONT_HERSHEY_COMPLEX_SMALL,1,(255,0,0),1);
+        putText(src, "cam_yaw "+to_string(angle_Y),Point2f(0,30),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
+        putText(src, "cam_pitch "+to_string(angle_P),Point2f(400,30),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
+        putText(src, "ptz_yaw "+to_string(stm.yaw),Point2f(0,50),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
+        putText(src, "ptz_pitch "+to_string(stm.pitch),Point2f(400,50),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
 //            putText(src, "abs_yaw "+to_string(abs_yaw),Point2f(0,70),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
 //            putText(src, "abs_pitch "+to_string(abs_pitch),Point2f(400,70),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
-            putText(src,"world point "+ to_string(world_point.x)+" "+ to_string(world_point.y)+" "+ to_string(world_point.z),Point2f(0,90),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0));
+        putText(src,"world point "+ to_string(world_point.x)+" "+ to_string(world_point.y)+" "+ to_string(world_point.z),Point2f(0,90),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0));
 #ifdef USE_PRE
-            circle(src,pixelPoint,20,Scalar(0,0,255),-1);
-            circle(src,pre_pixel,20,Scalar(0,255,0),-1);
+        circle(src,pixelPoint,20,Scalar(0,0,255),-1);
+        circle(src,pre_pixel,20,Scalar(0,255,0),-1);
 #endif
-            mSrc.unlock();
-            imshow("src",src);
-            cv::waitKey(1);
-#endif
-        } else {
-            cmd = 0x30;
-            angle_Y = angle_P = Dis = 0;
-            destroyAllWindows();
-        }
-        auto t2 = chrono::steady_clock::now();
-        if ((int) chrono::duration<double>(t2 - last_t).count() == 1) {
-            cout << " real frame " << frame_cnt << std::endl;
-            frame_cnt = 0;
-            last_t = t2;
-        }
 
-        cv::waitKey(4);
-        *(signed char *) &port.buff_w_[0] = int16_t(10000 * (angle_P));
-        *(signed char *) &port.buff_w_[1] = int16_t((10000 * (angle_P))) >> 8;
-        *(signed char *) &port.buff_w_[2] = int16_t(10000 * (angle_Y));
-        *(signed char *) &port.buff_w_[3] = int16_t((10000 * (angle_Y))) >> 8;
-        *(signed char *) &port.buff_w_[4] = int16_t(100 * Dis);
-        *(signed char *) &port.buff_w_[5] = int16_t(100 * Dis) >> 8;
-        port.SendBuff(cmd, port.buff_w_, 6);
-        auto t1 = chrono::steady_clock::now();
-        double cost = chrono::duration<double, milli>(t1 - t0).count();
-        std::cout << "armour tracking thread cost " << cost << " ms" << std::endl;
+#endif
+    } else{
+        cmd = 0x30;
+        angle_Y = angle_P = Dis = 0;
+        losing_cnt++;
     }
+    auto t2 = chrono::steady_clock::now();
+    if ((int) chrono::duration<double>(t2 - last_t).count() == 1) {
+//        cout << " real frame " << frame_cnt << std::endl;
+        frame_cnt = 0;
+        last_t = t2;
+    }
+    *(signed char *) &port.buff_w_[0] = int16_t(10000 * (angle_P));
+    *(signed char *) &port.buff_w_[1] = int16_t((10000 * (angle_P))) >> 8;
+    *(signed char *) &port.buff_w_[2] = int16_t(10000 * (angle_Y));
+    *(signed char *) &port.buff_w_[3] = int16_t((10000 * (angle_Y))) >> 8;
+    *(signed char *) &port.buff_w_[4] = int16_t(100 * Dis);
+    *(signed char *) &port.buff_w_[5] = int16_t(100 * Dis) >> 8;
+    port.SendBuff(cmd, port.buff_w_, 6);
 }
 
+/**
+ *
+ */
 
+[[noreturn]]void Armour::run() {
+    if (!readCameraParameters(cameraParam)) {
+        for (int i = 0; i < 100; ++i)
+            std::cout << "read camera param fail ..." << std::endl;
+    }
+    auto start_time = chrono::steady_clock::now();
+    while (true) {
+        auto ts = chrono::steady_clock::now();
+        std::chrono::time_point<std::chrono::steady_clock> t1;
+        mImg_buf.lock();
+        if (img_buf.size() > 0) {
+            std::cout << "img buff " << img_buf.size() << std::endl;
+            t1 = img_buf.front().first;
+            time_stamp = chrono::duration<double>(t1 - start_time).count();//s
+//            std::cout<<"time stamp "<<time_stamp<<std::endl;
+            src = img_buf.front().second.clone();
+            img_buf.pop();
+        }
+        mImg_buf.unlock();
+        if (!src.data) {
+            continue;
+        }
+        uint8_t find_color_armour = 2;
+        if (port.receive[4] > K_SPEED) {
+            find_color_armour = 2;
+            std::cout << "our team is blue, shoot red!!" << std::endl;
+        }
+        if (port.receive[4] < K_SPEED) {
+            find_color_armour = 1;
+            std::cout << "our team is red, shoot blue!!" << std::endl;
+        }
+        /// tracking roi test
+        fps_cnt++;
+        if (fps_cnt > 10) {
+            fps_cnt = losing_cnt = find_cnt = 0;
+        }
+        if (find_cnt > 5) {
+            tracking_flag = 1;
+            losing_cnt = 0;
+        }
+        if (tracking_flag) { tracking_cnt++; }
+        std::cout<<"losing cnt "<<losing_cnt<<std::endl;
+        if (losing_cnt > 3 ) {
+            tracking_flag = 0;
+            tracking_cnt = 0;
+            roi_ready = 0;
+            find_cnt = 0;
+            armourROI = Rect(0, 0, 0, 0);
+        }
+        cv::Mat dst;
+        if (roi_ready) {
+            roi = src(armourROI);
+            imgPretreatment(roi, dst, find_color_armour);
+        } else
+            imgPretreatment(src, dst, find_color_armour);
+#ifdef WRITE_IMG
+        char key = cv::waitKey(30);
+        if( key == 's'){
+            img_cnt++;
+            cv::imwrite(PROJECT_DIR"/data/"+ to_string(img_cnt)+".jpg",src);
+            std::cout<<"img idx ========================="<<to_string(img_cnt)<<std::endl;
+
+        }
+        imshow("picture",src);
+        cv::waitKey(1);
+        continue;
+#endif
+        if(!armourDetector(dst))
+            std::cout<<"<< ===== NO LIGHT ARMOUR FIND !!!! ===== >>"<<std::endl;
+        if(!armourSort())
+            std::cout<<"<< ===== NO ID ARMOUR FIND !!!! ===== >>"<<std::endl;
+        armour_tracking();
+        std::cout<<"<< ===== AUTO AIM RUNNING !!!! ===== >>"<<std::endl;
+        std::cout<<"<< ===== ARMOUR ROI STATUS "<< (int)roi_ready<<std::endl;
+#ifdef SHOW_IMG
+        imshow("src",src);
+        cv::waitKey(1);
+#endif
+        cv::waitKey(1);
+        auto te = chrono::steady_clock::now();
+        double cost = chrono::duration<double, milli> (te-ts).count();
+        std::cout<<"cost "<<cost<<" ms"<<std::endl;
+
+    }
+}
