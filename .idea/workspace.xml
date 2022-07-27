@@ -14,18 +14,31 @@
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
     <configurations>
-      <configuration PROFILE_NAME="Release-infantry_4" ENABLED="true" GENERATION_DIR="build" CONFIG_NAME="Release" TOOLCHAIN_NAME="infantry_4" GENERATION_OPTIONS="-G &quot;Unix Makefiles&quot;" />
+      <configuration PROFILE_NAME="Release" ENABLED="true" GENERATION_DIR="build" CONFIG_NAME="Release" GENERATION_OPTIONS="-G &quot;Unix Makefiles&quot;" />
     </configurations>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4459d475-be6b-478d-9dd8-94b9b1592471" name="Changes" comment="Changes">
       <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/params3.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config/params3.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/params4.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config/params4.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/params5.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config/params5.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/params6.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config/params6.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/record/Record.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/record/Record.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/armour/armour.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/armour/armour.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/armour/armour.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/armour/armour.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/classifier/Classifier.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/classifier/Classifier.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/base/base.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/base/base.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/common.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/common.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/predictor/EKFPredictor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/EKFPredictor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/predictor/predictor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictor/predictor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/serial/serial_port.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial/serial_port.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/serial/serial_port.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial/serial_port.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,7 +48,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Release-infantry_4" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Release" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -101,17 +114,20 @@
   }
 }</component>
   <component name="RunManager" selected="CMake Application.ArmourShoot">
-    <configuration name="ArmourShoot" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ArmourShoot" TARGET_NAME="ArmourShoot" CONFIG_NAME="Release-infantry_4" RUN_TARGET_PROJECT_NAME="ArmourShoot" RUN_TARGET_NAME="ArmourShoot">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ArmourShoot" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ArmourShoot" TARGET_NAME="ArmourShoot" CONFIG_NAME="Release" RUN_TARGET_PROJECT_NAME="ArmourShoot" RUN_TARGET_NAME="ArmourShoot">
+      <envs>
+        <env name="DISPLAY" value="localhost:10.0" />
+      </envs>
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="src" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ArmourShoot" TARGET_NAME="src" CONFIG_NAME="Release-infantry_4">
+    <configuration name="src" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ArmourShoot" TARGET_NAME="src" CONFIG_NAME="Release">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -351,7 +367,17 @@
       <workItem from="1658414392252" duration="10337000" />
       <workItem from="1658543593234" duration="2121000" />
       <workItem from="1658556675045" duration="4309000" />
-      <workItem from="1658586652281" duration="874000" />
+      <workItem from="1658586652281" duration="6331000" />
+      <workItem from="1658597271433" duration="485000" />
+      <workItem from="1658630737836" duration="1768000" />
+      <workItem from="1658737768559" duration="5575000" />
+      <workItem from="1658746633888" duration="6074000" />
+      <workItem from="1658816508287" duration="617000" />
+      <workItem from="1658819416188" duration="4419000" />
+      <workItem from="1658824559833" duration="1294000" />
+      <workItem from="1658845257738" duration="5993000" />
+      <workItem from="1658853979197" duration="549000" />
+      <workItem from="1658912694969" duration="236000" />
     </task>
     <servers />
   </component>
@@ -379,23 +405,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/predictor/predictor.cpp</url>
-          <line>138</line>
+          <line>139</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/predictor/predictor.cpp</url>
-          <line>277</line>
+          <line>278</line>
           <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/predictor/predictor.cpp</url>
-          <line>251</line>
+          <line>252</line>
           <option name="timeStamp" value="13" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/armour/armour.cpp</url>
-          <line>708</line>
-          <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

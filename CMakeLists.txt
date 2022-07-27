@@ -39,6 +39,6 @@ include_directories(
 
 add_subdirectory(src)
 
-add_executable(ArmourShoot main.cpp record/Record.cpp record/Record.h )
+add_executable(ArmourShoot main.cpp )
 target_link_libraries(ArmourShoot src)
 

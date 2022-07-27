@@ -4,16 +4,12 @@
 #include "common.h"
 #include "tool_fun.h"
 #include <mutex>
-#include "common.h"
 
 extern std::queue<pair<std::chrono::time_point<std::chrono::steady_clock>, cv::Mat>> img_buf;
 extern SerialPort port;
 extern std::mutex mImg_buf;
-std::mutex mTmp_armour_queue;
-std::mutex mArmour_queue;
-std::mutex mDst_queue;
-std::mutex mSrc;
 extern Ptz_infor stm;
+extern Send send_data;
 float armour_small_pt[5][2] = {
         0.0, 0.0,
         0.0675, 0.0,
@@ -44,8 +40,7 @@ Armour::Armour() {
     numClass = make_shared<Classifier>();
     angleSolver = make_shared<AngleSolver>();
     ekf = make_shared<EKFPredictor>();
-//    predictor = make_shared<Predictor>();
-
+    energy = make_shared<Energy>();
 }
 
 Armour::~Armour() {
@@ -287,10 +282,10 @@ Point3f Armour::getCamCoordinate(Point2f &tg_pt_L, Point2f &tg_pt_R, float wh_ra
     Mat rvec, tvec;
     cv::solvePnP(cv::Mat(corners), cv::Mat(observationPts), camMatrix, distCoeffs, rvec, tvec, false);
     double Z = tvec.at<double>(2, 0);
-    double X = tvec.at<double>(0, 0);
-    double Y = tvec.at<double>(1, 0);
-//    double X = (tg_center.x - cx) * Z / fx ;
-//    double Y = (tg_center.y - cy) * Z / fy ;
+//    double X = tvec.at<double>(0, 0);
+//    double Y = tvec.at<double>(1, 0);
+    double X = (tg_center.x - cx) * Z / fx ;
+    double Y = (tg_center.y - cy) * Z / fy ;
     return Point3f(X, Y, Z);
 }
 
@@ -331,7 +326,6 @@ bool Armour::ifShoot(double angle_p, double angle_y) {
         return false;
 }
 
-#define K_SPEED 10000
 
 /**
  *2th
@@ -384,16 +378,16 @@ bool Armour::armourSort(void) {
         dstRect[3] = Point2f(0, height);
         Mat transform = getPerspectiveTransform(srcRect, dstRect);
         Mat src1;
-        if(roi_ready){
+        if (roi_ready) {
             warpPerspective(roi, src1, transform, Size(width, height));
-            std::cout<<"roi ready "<<std::endl;
-        }else
+            std::cout << "roi ready " << std::endl;
+        } else
             warpPerspective(src, src1, transform, Size(width, height));
 //        imshow("warp after", src1);
 //        cv::waitKey(1);
-        int num = -1;
+        int num = 3;
         ///recognize number
-        num = numClass->numPredict(src1);
+//        num = numClass->numPredict(src1);
         if (num < 1) {
             i = tmp_armour_vec.erase(i);
             continue;
@@ -418,40 +412,21 @@ chrono::time_point<chrono::steady_clock> last_t;
 #define USE_PRE
 //#define SHOW_IMG
 
-void Armour::armour_tracking(void) {
-
+void Armour::armour_tracking() {
     last_t = chrono::steady_clock::now();
     /**creat searching ROI **/
     int tg_num = 0;
-    double angle_P, angle_Y, Dis;
     char cmd = 0x30;
     Armour_data target_armour;
     target_armour.armour_PL = Point2f(-1, -1);
     if (tmp_armour_vec.size()) { tg_num = tmp_armour_vec.size(); }
-    std::cout<<"tg_num "<<tg_num<<std::endl;
+    std::cout << "tg_num " << tg_num << std::endl;
     if (tg_num) {
         if (tmp_armour_vec.size() == 1) {
             target_armour.armour_rect = tmp_armour_vec[0].armour_rect;
             target_armour.armour_PL = tmp_armour_vec[0].v_Pts_L;
             target_armour.armour_PR = tmp_armour_vec[0].v_Pts_R;
             target_armour.id = tmp_armour_vec[0].id;
-//            select_id = tmp_armour_vec[0].id;
-//            if (select_id == last_id) {
-//                id_cnt++;
-//                tmp_losing = 0;
-//            } else {
-//                tmp_losing++;
-//                if (tmp_losing > 5) {
-//                    id_cnt = 0;
-//                }
-//            }
-//            last_id = select_id;
-//            if (id_cnt) {
-//                id_locked = true;
-//                tmp_losing = 0;
-//                id_cnt = 0;
-//                std::cout << "id locked !!" << std::endl;
-//            }
         } else if (tmp_armour_vec.size() > 1) {
             if (!id_locked) {
                 double min_dis = 10000;
@@ -515,10 +490,16 @@ void Armour::armour_tracking(void) {
                 }
             }
         }
-    }else{
-        cmd = 0x30;
-        angle_Y = angle_P = Dis = 0;
-        losing_cnt++;
+    } else {
+        if(last_find_f){
+            cmd = 0x31;
+            send_data = last_send;
+            last_find_f = 0;
+        } else{
+            cmd = 0x30;
+            send_data = {0, 0, 0};
+            losing_cnt++;
+        }
     }
     /// select armour is real
     if (target_armour.armour_PL.x > 0) {
@@ -543,7 +524,7 @@ void Armour::armour_tracking(void) {
             if (roi_x + roi_w > src.cols) { roi_w = src.cols - roi_x; }
             if (roi_y + roi_h > src.rows) { roi_h = src.rows - roi_y; }
             armourROI = Rect(roi_x, roi_y, roi_w, roi_h);
-            rectangle(src,armourROI,Scalar(255,0,0),2);
+            rectangle(src, armourROI, Scalar(255, 0, 0), 2);
             if (armourROI.width > 0) {
                 roi_ready = 1;
             }
@@ -582,7 +563,13 @@ void Armour::armour_tracking(void) {
         auto pre_abs = ekf->predict(a, time_stamp);
         auto pre_cam = angleSolver->abs2cam(pre_abs, use_stm);
         auto pre_pixel = cam2pixel(pre_cam);
-        angleSolver->getAngle(pre_cam, angle_P, angle_Y, Dis);
+        if(fabs(pre_pixel.x - pixelPoint.x) > 0.5*src.cols || fabs(pre_pixel.y-pixelPoint.y) > 0.5*src.rows){
+            ekf->is_inited = false;
+            angleSolver->getAngle(camPoint, send_data.pitch, send_data.yaw, send_data.dis);
+        }else
+            angleSolver->getAngle(pre_cam, send_data.pitch, send_data.yaw, send_data.dis);
+        last_send = {send_data.pitch,send_data.yaw,send_data.dis};
+        last_find_f = 1;
 #else
         angleSolver->getAngle(camPoint,angle_P,angle_Y,Dis);
         auto world_point = angleSolver->cam2abs(camPoint,stm);
@@ -590,16 +577,13 @@ void Armour::armour_tracking(void) {
         double abs_yaw = stm.yaw - angle_Y;
         double abs_pitch = stm.pitch + angle_P;
 #endif
-        std::cout << " == ang_P " << angle_P
-                  << " == ang_Y " << angle_Y
-                  << " == Dis " << Dis
-                  << std::endl;
+
 #ifdef SHOW_IMG
         //add thread mutex
         draw_target(target_armour.armour_rect,src);
         putText(src, to_string(target_armour.id),target_armour.armour_rect.boundingRect().tl(),FONT_HERSHEY_COMPLEX_SMALL,1,(255,0,0),1);
-        putText(src, "cam_yaw "+to_string(angle_Y),Point2f(0,30),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
-        putText(src, "cam_pitch "+to_string(angle_P),Point2f(400,30),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
+        putText(src, "cam_yaw "+to_string(send_data.yaw),Point2f(0,30),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
+        putText(src, "cam_pitch "+to_string(send_data.pitch),Point2f(400,30),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
         putText(src, "ptz_yaw "+to_string(stm.yaw),Point2f(0,50),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
         putText(src, "ptz_pitch "+to_string(stm.pitch),Point2f(400,50),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
 //            putText(src, "abs_yaw "+to_string(abs_yaw),Point2f(0,70),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
@@ -611,10 +595,16 @@ void Armour::armour_tracking(void) {
 #endif
 
 #endif
-    } else{
-        cmd = 0x30;
-        angle_Y = angle_P = Dis = 0;
-        losing_cnt++;
+    } else {
+        if(last_find_f){
+            cmd = 0x31;
+            send_data = last_send;
+            last_find_f = 0;
+        } else{
+            send_data = {0, 0, 0};
+            cmd = 0x30;
+            losing_cnt++;
+        }
     }
     auto t2 = chrono::steady_clock::now();
     if ((int) chrono::duration<double>(t2 - last_t).count() == 1) {
@@ -622,34 +612,35 @@ void Armour::armour_tracking(void) {
         frame_cnt = 0;
         last_t = t2;
     }
-    *(signed char *) &port.buff_w_[0] = int16_t(10000 * (angle_P));
-    *(signed char *) &port.buff_w_[1] = int16_t((10000 * (angle_P))) >> 8;
-    *(signed char *) &port.buff_w_[2] = int16_t(10000 * (angle_Y));
-    *(signed char *) &port.buff_w_[3] = int16_t((10000 * (angle_Y))) >> 8;
-    *(signed char *) &port.buff_w_[4] = int16_t(100 * Dis);
-    *(signed char *) &port.buff_w_[5] = int16_t(100 * Dis) >> 8;
+    *(signed char *) &port.buff_w_[0] = int16_t(10000 * (send_data.pitch));
+    *(signed char *) &port.buff_w_[1] = int16_t((10000 * (send_data.pitch))) >> 8;
+    *(signed char *) &port.buff_w_[2] = int16_t(10000 * (send_data.yaw));
+    *(signed char *) &port.buff_w_[3] = int16_t((10000 * (send_data.yaw))) >> 8;
+    *(signed char *) &port.buff_w_[4] = int16_t(100 * send_data.dis);
+    *(signed char *) &port.buff_w_[5] = int16_t(100 * send_data.dis) >> 8;
     port.SendBuff(cmd, port.buff_w_, 6);
 }
 
 /**
  *
  */
-
+#define K_SPEED 10000
 [[noreturn]]void Armour::run() {
     if (!readCameraParameters(cameraParam)) {
         for (int i = 0; i < 100; ++i)
             std::cout << "read camera param fail ..." << std::endl;
     }
+    int img_cnt = 0;
     auto start_time = chrono::steady_clock::now();
     while (true) {
         auto ts = chrono::steady_clock::now();
         std::chrono::time_point<std::chrono::steady_clock> t1;
+        double imu_p,imu_y;
         mImg_buf.lock();
         if (img_buf.size() > 0) {
             std::cout << "img buff " << img_buf.size() << std::endl;
             t1 = img_buf.front().first;
             time_stamp = chrono::duration<double>(t1 - start_time).count();//s
-//            std::cout<<"time stamp "<<time_stamp<<std::endl;
             src = img_buf.front().second.clone();
             img_buf.pop();
         }
@@ -657,66 +648,73 @@ void Armour::armour_tracking(void) {
         if (!src.data) {
             continue;
         }
+#ifdef WRITE_IMG
+        char key = cv::waitKey(30);
+        if (key == 's') {
+            img_cnt++;
+            cv::imwrite(PROJECT_DIR"/data/" + to_string(img_cnt) + ".jpg", src);
+            std::cout << "img idx =========================" << to_string(img_cnt) << std::endl;
+
+        }
+        imshow("picture", src);
+        cv::waitKey(1);
+        continue;
+#endif
         uint8_t find_color_armour = 2;
+        uint8_t find_color_energy = 1;
         if (port.receive[4] > K_SPEED) {
             find_color_armour = 2;
+            find_color_energy = 1;
             std::cout << "our team is blue, shoot red!!" << std::endl;
         }
         if (port.receive[4] < K_SPEED) {
             find_color_armour = 1;
+            find_color_energy = 2;
             std::cout << "our team is red, shoot blue!!" << std::endl;
         }
-        /// tracking roi test
-        fps_cnt++;
-        if (fps_cnt > 10) {
-            fps_cnt = losing_cnt = find_cnt = 0;
+        STATE mode = getMode(port.receive[1]);
+        switch (mode) {
+            case STATE_BUFF:
+                break;
+            default:
+                /// tracking roi test
+                fps_cnt++;
+                if (fps_cnt > 10) {
+                    fps_cnt = losing_cnt = find_cnt = 0;
+                }
+                if (find_cnt > 5) {
+                    tracking_flag = 1;
+                    losing_cnt = 0;
+                }
+                if (tracking_flag) { tracking_cnt++; }
+                if (losing_cnt > 5) {
+                    tracking_flag = tracking_cnt =roi_ready = find_cnt = 0;
+                    armourROI = Rect(0, 0, 0, 0);
+                }
+                cv::Mat dst;
+                if (roi_ready) {
+                    roi = src(armourROI);
+                    imgPretreatment(roi, dst, find_color_armour);
+                } else
+                    imgPretreatment(src, dst, find_color_armour);
+                if (!armourDetector(dst))
+                    std::cout << "<< ===== NO LIGHT ARMOUR FIND !!!! ===== >>" << std::endl;
+                if (!armourSort())
+                    std::cout << "<< ===== NO ID ARMOUR FIND !!!! ===== >>" << std::endl;
+                armour_tracking();
+                std::cout << "<< ===== AUTO AIM RUNNING !!!! ===== >>" << std::endl;
+                std::cout << "<< ===== ARMOUR ROI STATUS " << (int) roi_ready << std::endl;
         }
-        if (find_cnt > 5) {
-            tracking_flag = 1;
-            losing_cnt = 0;
-        }
-        if (tracking_flag) { tracking_cnt++; }
-        std::cout<<"losing cnt "<<losing_cnt<<std::endl;
-        if (losing_cnt > 3 ) {
-            tracking_flag = 0;
-            tracking_cnt = 0;
-            roi_ready = 0;
-            find_cnt = 0;
-            armourROI = Rect(0, 0, 0, 0);
-        }
-        cv::Mat dst;
-        if (roi_ready) {
-            roi = src(armourROI);
-            imgPretreatment(roi, dst, find_color_armour);
-        } else
-            imgPretreatment(src, dst, find_color_armour);
-#ifdef WRITE_IMG
-        char key = cv::waitKey(30);
-        if( key == 's'){
-            img_cnt++;
-            cv::imwrite(PROJECT_DIR"/data/"+ to_string(img_cnt)+".jpg",src);
-            std::cout<<"img idx ========================="<<to_string(img_cnt)<<std::endl;
-
-        }
-        imshow("picture",src);
-        cv::waitKey(1);
-        continue;
-#endif
-        if(!armourDetector(dst))
-            std::cout<<"<< ===== NO LIGHT ARMOUR FIND !!!! ===== >>"<<std::endl;
-        if(!armourSort())
-            std::cout<<"<< ===== NO ID ARMOUR FIND !!!! ===== >>"<<std::endl;
-        armour_tracking();
-        std::cout<<"<< ===== AUTO AIM RUNNING !!!! ===== >>"<<std::endl;
-        std::cout<<"<< ===== ARMOUR ROI STATUS "<< (int)roi_ready<<std::endl;
 #ifdef SHOW_IMG
         imshow("src",src);
         cv::waitKey(1);
 #endif
-        cv::waitKey(1);
         auto te = chrono::steady_clock::now();
-        double cost = chrono::duration<double, milli> (te-ts).count();
-        std::cout<<"cost "<<cost<<" ms"<<std::endl;
-
+        double cost = chrono::duration<double, milli>(te - ts).count();
+        std::cout << " == ang_P " << send_data.pitch
+                  << " == ang_Y " << send_data.yaw
+                  << " == Dis " << send_data.dis
+                  << std::endl;
+        std::cout << "cost " << cost << " ms" << std::endl;
     }
 }

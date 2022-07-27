@@ -125,17 +125,11 @@ void AngleSolver::getAngle(cv::Point3f cam_, double &pitch, double &yaw, double 
 //        std::cout << "angle fix " << angle_fix << std::endl;
         abs_pitch += angle_fix;
     }
-    //std::cout<<"ssssssss"<<std::endl;
+    std::cout<<"ssssssss"<<std::endl;
     pitch = -abs_pitch - ptz_pitch;
-    if (port.receive[1] == 'h') {
-//        std::cout << "aaaaaaaaaaaaaaaaa" << std::endl;
-        pitch += sentry_pitch_diff;//-0.012
-        yaw += sentry_yaw_diff;//-0.023
-    } else {
-        std::cout << "3ss" << std::endl;
-        pitch += simple_pitch_diff;//-0.010
-        yaw += simple_yaw_diff;//-0.023
-    }
+    pitch += simple_pitch_diff;//-0.010
+    yaw += simple_yaw_diff;//-0.023
+
     if (port.receive[1] == 'b' || port.receive[1] == 'a') {
         std::cout << "buff add666" << std::endl;
         pitch += buff_pitch_diff;//0.01
@@ -147,91 +141,4 @@ void AngleSolver::getAngle_nofix(cv::Point3f cam_, double &pitch, double &yaw, d
     pitch = atan(gun_.y / sqrt(gun_.x * gun_.x + gun_.z * gun_.z));//more big more down
     yaw = atan(gun_.x / gun_.z); //more big more right
     Dis = sqrt(gun_.x * gun_.x + gun_.z * gun_.z +gun_.y*gun_.y);
-}
-
-///==================================== AngleSolver End ==================================================///
-
-
-/***********************************************
- * @descrip
- * @param
- * @return
- * @date
- *************************************************/
-/////////////// AngleFilter ///////////////
-
-/**
- *
- * @param a_process_noise
- * @param a_measure_noise
- * @param a_val_diff
- */
-Kalman::Kalman(double a_process_noise, double a_measure_noise, double a_val_diff)
-{
-    setParam();
-    m_KF = std::make_shared<cv::KalmanFilter>(m_state_num, m_measure_num, 0);
-    m_measurement = cv::Mat::zeros(m_measure_num, 1, CV_32F);
-    cv::setIdentity(m_KF->measurementMatrix);
-    cv::setIdentity(m_KF->processNoiseCov, cv::Scalar::all(a_process_noise));
-    cv::setIdentity(m_KF->measurementNoiseCov, cv::Scalar::all(a_measure_noise));
-    cv::setIdentity(m_KF->errorCovPost, cv::Scalar::all(1));
-    float dt = 1.f / m_control_freq;
-    m_KF->transitionMatrix = (cv::Mat_<float>(m_state_num, m_state_num) <<
-                              1, dt,
-                              0, 1);
-    m_val_diff = a_val_diff;
-}
-
-/**
- *x
- */
-void Kalman::setParam() {
-
-    m_debug;
-    m_init_count_threshold;
-    m_predict_coe;
-    m_control_freq;
-}
-
-/**
- *
- * @param a_val
- */
-void Kalman::initFilter(double a_val) {
-    m_KF->statePost = (cv::Mat_<float>(m_state_num, 1) << a_val, 0);
-    m_KF->predict();
-    m_measurement.at<float>(0) = a_val;
-
-    for (int i = 0; i < m_init_count_threshold; i++) {
-        m_KF->correct(m_measurement);
-        m_KF->predict();
-    }
-    std::cout << "Init" << std::endl;
-}
-
-/**
- *
- * @param a_val
- * @return
- */
-double Kalman::predict(double a_val) {
-    cv::Mat result;
-
-    if (!m_initialized) {
-        initFilter(a_val);
-        m_last_val = a_val;
-        m_initialized = true;
-    }
-
-    m_measurement.at<float>(0) = a_val;
-    m_KF->correct(m_measurement);
-    result = m_KF->predict();
-    if (std::fabs(a_val - m_last_val) > m_val_diff) {
-        initFilter(a_val);
-        if (m_debug)
-            std::cout << "Target has changed" << std::endl;
-    }
-    m_last_val = a_val;
-
-    return 1.0 * result.at<float>(0) + 0.0 * result.at<float>(1);
 }

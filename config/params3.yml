@@ -1,4 +1,6 @@
 %YAML:1.0
+
+# old
 armour:
   debug: 0
   red_spilt_threshold: 85

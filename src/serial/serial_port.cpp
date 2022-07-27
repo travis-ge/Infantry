@@ -462,7 +462,7 @@ int SerialPort::ReceiveBuff(char *src_buff, char *dst_buff)
  * @return
  * @date
  */
-void port_receive(void){
+[[noreturn]]void SerialPort::port_receive(void){
     std::cout<<"创建线程成功:"<<std::endl;
     //while(!port.PortInit(0, 115200));
     int status = -2;

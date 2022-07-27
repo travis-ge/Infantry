@@ -1,5 +1,5 @@
 //
-// Created by ares on 22-5-18.
+// Created by quanyi on 22-5-18.
 //
 
 #include "Record.h"
@@ -9,7 +9,6 @@ Record::Record() {
     setParam();
 }
 Record::~Record() {
-
     delete videoWriter;
 }
 
@@ -26,7 +25,7 @@ bool Record::setParam() {
     //std::cout<<"t "<<filename<<std::endl;
     path = "/home/aididiz/video/"+filename + ".avi";
     //std::cout<<"path is "<<path<<std::endl;
-    fps = 60;
+    fps = 20;
     size = cv::Size(960,768);
     is_inited = false;
     videoWriter = new cv::VideoWriter();

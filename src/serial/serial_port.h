@@ -25,6 +25,7 @@ public:
     bool Write(char *buff, size_t length);//写串口数据
     bool SendBuff(char command, char *data, unsigned short length);//发送数据
     int ReceiveBuff(char *src_buff, char *dst_buff);//接受数据
+    [[noreturn]]void port_receive(void);
 private:
     int fd_;//串口文件
     int OpenDev(const char *dev);
@@ -35,6 +36,6 @@ private:
     bool ISO14443ACheckLen(unsigned  char* buffer);
 };
 
-void port_receive(void);
+
 
 #endif //ARMOURSHOT_SERIAL_PORT_H

@@ -52,12 +52,12 @@ cv::Point3f EKFPredictor::predict(Armour_case &armour, double t) {
     Eigen::Vector3d p_pw{Xp(0, 0), Xp(2, 0), Xp(4, 0)}; // predict
     std::cout<<" x v_speed "<<Xe(1,0) << " y v_speed "<<Xe(3,0)<<std::endl;
 
-    double pre_dis = sqrt(pow(p_pw(0,0),2) + pow(p_pw(1,0),2) + pow(p_pw(2,0),2));
+//    double pre_dis = sqrt(pow(p_pw(0,0),2) + pow(p_pw(1,0),2) + pow(p_pw(2,0),2));
     ///check if predict acceptable
-    if(fabs(pre_dis - dis) > 0.5){
-        std::cout<<" pre error :"<< fabs(pre_dis-dis)<<std::endl;
-        is_inited = false;
-        return armour.world_point;
-    }
+//    if(fabs(pre_dis - dis) > 0.5){
+//        std::cout<<" pre error :"<< fabs(pre_dis-dis)<<std::endl;
+//        is_inited = false;
+//        return armour.world_point;
+//    }
     return cv::Point3f (p_pw(0,0),p_pw(1,0),p_pw(2,0));
 }

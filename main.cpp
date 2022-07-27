@@ -1,22 +1,19 @@
-/*********         *********/
+/*********    Ares2022     *********/
 #include <vector>
-#include <string>
 #include <iostream>
-#include <queue>
 #include <thread>
 #include <mutex>
 #include "armour.h"
 #include "serial_port.h"
 #include "common.h"
-#include "base.h"
 
 std::chrono::time_point<std::chrono::steady_clock> start_time;
 SerialPort port;
+Armour armour;
 Ptz_infor stm;
-
+Send send_data;
 int main() {
     start_time = chrono::steady_clock::now();
-    Armour armour;
     GX_STATUS status = Config();
     if (status != GX_STATUS_SUCCESS) {
         std::cout << "config Camera Faile ..." << std::endl;
@@ -38,12 +35,10 @@ int main() {
         return 0;
     }
     while (!port.PortInit(0, 115200));
-    std::thread serial_receive_thread(port_receive);
+    std::thread serial_receive_thread(&SerialPort::port_receive,port);
     std::thread armour_auto_shoot(&Armour::run,armour);
-//    std::thread armour_auto_shoot(aaaa);
     serial_receive_thread.join();
     armour_auto_shoot.join();
-
 
     return 0;
 }

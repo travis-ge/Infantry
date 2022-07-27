@@ -1,4 +1,5 @@
 %YAML:1.0
+
 # QUAN XIANG
 armour:
   debug: 0
@@ -24,7 +25,7 @@ energy:
   area_rate_max: 0.6
 
 base:
-  simple_pitch_diff: 0.020
+  simple_pitch_diff: 0.0
   simple_yaw_diff: 0.00
   sentry_pitch_diff: -0.005
   sentry_yaw_diff: -0.018
@@ -36,7 +37,7 @@ ekf:
   Q00: 0.1
   Q11: 10
   Q22: 0.1
-  Q33: 1
+  Q33: 10
   Q44: 0.01
   # measure
   R00: 1

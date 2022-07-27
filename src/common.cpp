@@ -20,7 +20,7 @@ int cnt = 0;
 char *pRGB24Buf_0 = new char[image_width * image_height * 3];
 std::queue<pair<std::chrono::time_point<std::chrono::steady_clock>,cv::Mat>> img_buf;
 std::mutex mImg_buf;
-
+extern Ptz_infor stm;
 /**
  *
  * @param pFrame
@@ -92,7 +92,7 @@ void Frame_0_ProcessRGB(GX_FRAME_CALLBACK_PARAM *pFrame) {
 }
 /**
  *
- * @param infor
+ * @param information
  * @return
  */
 STATE getMode(char infor){

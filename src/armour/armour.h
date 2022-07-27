@@ -10,6 +10,7 @@
 #include "num_classifier.h"
 #include <EKFPredictor.h>
 #include "predictor.h"
+#include "energy.h"
 using namespace std;
 using namespace cv;
 
@@ -40,28 +41,25 @@ public:
 
     bool ifShoot(double angle_p,double angle_y);
     cv::Point2f cam2pixel(cv::Point3f camPoint);
-    void armour_imgProcess();
-    void armour_tracking(void);
+    void armour_tracking();
     [[noreturn]]void run();
     ///
-    cv::Mat camMatrix;
-    cv::Mat distCoeffs;
+
     std::vector<cv::Point3f> corners;
     std::vector<cv::Point2f> observationPts;
     cv::Point2f tg_center;
     double cx,cy,fx,fy;
     uint8_t debug;
-    queue<pair<double,Armour_data>> armour_queue;
-    Rect tracking_roi ;
-    cv::Point2f roi_pl;
 private:
+    Send last_send;
+    uint8_t last_find_f = 0;
+    cv::Mat camMatrix;
+    cv::Mat distCoeffs;
     double time_stamp;
     Mat src,src_gray, src_separation, src_green;
     Mat roi;
     std::vector<cv::Mat> src_split_;
     vector<Tmp_armour> tmp_armour_vec;
-    queue<pair<double,cv::Mat>> imgProcessed_queue;
-    queue<pair<double,vector<Tmp_armour>>>  tmp_armour_queue;
     bool id_locked = false;
     int select_id = 0;
     int id_cnt = 0;
@@ -88,11 +86,13 @@ private:
     shared_ptr<Classifier> numClass;
     shared_ptr<AngleSolver> angleSolver;
     shared_ptr<EKFPredictor> ekf;
+    shared_ptr<Energy> energy;
+    const Mat element3 = getStructuringElement(MORPH_RECT,Size(3,3));
+    const Mat element3_5 = getStructuringElement(MORPH_RECT,Size(3,5));
+    const Mat element5_7 = getStructuringElement(MORPH_RECT,Size(5,7));
+    const Mat element7_9 = getStructuringElement(MORPH_RECT,Size(7,9));
 };
 
-const Mat element3 = getStructuringElement(MORPH_RECT,Size(3,3));
-const Mat element3_5 = getStructuringElement(MORPH_RECT,Size(3,5));
-const Mat element5_7 = getStructuringElement(MORPH_RECT,Size(5,7));
-const Mat element7_9 = getStructuringElement(MORPH_RECT,Size(7,9));
+
 
 #endif

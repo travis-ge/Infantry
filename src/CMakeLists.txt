@@ -8,7 +8,7 @@ AUX_SOURCE_DIRECTORY(topaimer AIMER_DIR)
 AUX_SOURCE_DIRECTORY(base BASE_DIR)
 AUX_SOURCE_DIRECTORY(topaimer TOP_DIR)
 AUX_SOURCE_DIRECTORY(filter Filter_DIR)
-
+AUX_SOURCE_DIRECTORY(record Record_DIR)
 find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
@@ -22,19 +22,14 @@ add_library(src SHARED ${ARMOUR_DIR}
         ${TOP_DIR}
         ${ENERGY_DIR}
         ${Filter_DIR}
-
+        ${Record_DIR}
         common.cpp shooter/shooter.cpp shooter/shooter.h
         )
 
 target_link_libraries(src
-        #${CERES_LIBRARIES}
-        #                          ${GLOG_LIBRARIES}
         ${OpenCV_LIBS}
         ${CERES_LIBRARIES}
         ${Eigen3_LIBRARIES}
         /usr/lib/libgxiapi.so
         yaml-cpp
-        #                          matplotlib_cpp::matplotlib_cpp
-        #                          ${CERES_INCLUDE_DIRS}
-
         )
