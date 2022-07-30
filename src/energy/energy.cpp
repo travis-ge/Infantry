@@ -6,9 +6,11 @@
 #include "common.h"
 #include "base.h"
 
+//#define PLOT_DRAW
+
 using namespace cv;
 using namespace std;
-
+extern Ptz_infor stm;
 float armour_energy_pt[5][2] = {
         0.0,0.0,       //世界坐标系原点
         -0.115,-0.0625,    //zuoxia
@@ -171,6 +173,7 @@ bool Energy::getCamP(cv::Point2f *points) {
     double Y = tvec.at<double>(1,0);
 
     camEnergyP = Point3f (X,Y,Z);
+    return true;
 
 }
 /**
@@ -181,11 +184,12 @@ bool Energy::getCamP(cv::Point2f *points) {
  * @param angle
  * @return
  */
-bool Energy::getPredicPoints(cv::Point2f center, cv::Point2f src_P, cv::Point2f &dst_P, double angle) {
+void Energy::getPredicPoints(cv::Point2f center, cv::Point2f src_P, cv::Point2f &dst_P, double angle) {
     float d_x = src_P.x - center.x;
     float d_y = src_P.y - center.y;
     dst_P.x = d_x * cos(angle) - d_y * sin(angle) + center.x;
     dst_P.y = d_x * sin(angle) + d_y * cos(angle) + center.y;
+//    std::cout<<d_x << " "<< d_y<<" "<<dst_P.x<<" "<<dst_P.y<<std::endl;
 }
 /**
  *
@@ -195,19 +199,24 @@ bool Energy::getPredicPoints(cv::Point2f center, cv::Point2f src_P, cv::Point2f 
  * @param mode
  * @return
  */
-bool Energy::run(cv::Mat &src, int time_stamp, int find_color_energy, char mode) {
+bool Energy::run(cv::Mat &src, int time_stamp, int find_color_energy, char mode,double & p, double &y, double &d) {
     int mode_chose;
-    if(mode == 'a'){mode_chose = 1;}
-    if (mode == 'b'){mode_chose = 2;}
-    int finder_status  = finder->searchArmour(src,time_stamp,0.3, find_color_energy,mode_chose);
-    if(!finder_status){
+    if(mode == 'a'){mode_chose = 1;}   //small
+    if (mode == 'b'){mode_chose = 2;}  //big
+
+    mode_chose = 2;
+//    mode_chose = 1;
+//    std::cout<<"buff predict time "<<predict_time<<std::endl;
+//    int finder_status  = finder->searchArmour(src,time_stamp,predict_time+0.05, find_color_energy,mode_chose);
+    int finder_status  = finder->searchArmour(src,time_stamp,predict_time+0.05, find_color_energy,mode_chose);
+    if(!finder_status||finder_status==-1){
         return false;
     }
     cv::Point2f center;
-    draw_energy_target(src,finder->fan_.armour_points,center);
+
     sortPoints(finder->fan_.armour_points);
     Point2f cameraPoints[5];
-    cameraPoints[0] = center;
+    cameraPoints[0] = finder->fan_.tag_point;
     for (int i = 1; i < 5; i++) {
         cameraPoints[i] = finder->fan_.armour_points[i-1];
     }
@@ -218,11 +227,35 @@ bool Energy::run(cv::Mat &src, int time_stamp, int find_color_energy, char mode)
         cv::Point2f precamP[5];
         for (int i = 0; i < 5; i++) {
             getPredicPoints(finder->circle_center_point,cameraPoints[i], precamP[i],finder->fan_.pre_angle);
-        }
-        getCamP(precamP);
-        double p ,y ,d;
-        angleSolver->getAngle(camEnergyP,p,y,d);
 
+        }
+        circle(src,precamP[0],10,Scalar(0,255,0),-1);
+#ifdef PLOT_DRAW
+        draw_energy_target(src,finder->fan_.armour_points,center);
+        circle(src,precamP[0],6,Scalar(0,255,0),-1);
+
+        circle(src,finder->circle_center_point,10,Scalar(0,0,255),-1);
+#endif
+        if(finder->fan_.pre_angle == 0 && last_p !=0){
+            p = last_p;
+            y = last_y;
+            d = last_d;
+            last_y = last_p =last_d = 0;
+        }else{
+            getCamP(precamP);
+            angleSolver->getAngle(camEnergyP,p,y,d);
+            d = 7.1;
+            last_p = p;
+            last_y = y;
+            last_d = d;
+            double dis = (d + Dis_last)/2;
+            predict_time = dis / stm.bulletSpeed;
+            Dis_last = dis;
+        }
+        return true;
     }
 
+}
+void Energy::energy_init() {
+    finder->is_inited = false;
 }

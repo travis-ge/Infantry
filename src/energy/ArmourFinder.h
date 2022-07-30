@@ -11,6 +11,7 @@
 
 #include "tool_fun.h"
 #include "data_tpye.h"
+#include "particle_filter.h"
 //智能车写法，全局变量一堆
 using namespace cv;
 using namespace std;
@@ -67,7 +68,7 @@ private:
     Mat dst;
     Mat tagROI;
     std::vector<cv::Mat> src2bgr;
-    Mat src_gray, src_separation, src_green;
+    Mat src_gray, src_separation, src_green, src_bin;
 
     ///一个任务周期清零一次///
     bool  is_first_find;
@@ -75,6 +76,10 @@ private:
     int   rotation_direction=0;         //当前方向 顺时针 1 逆时针 -1
     int   last_rotation_direction=0;    //上一次方向
     double   predict_time=0;               //预测时间
+
+    ParticleFilter pf;
+    ParticleFilter pf_param_loader;
+
     /////////
 
     ///每帧图像变量都清零一次///
@@ -93,9 +98,11 @@ private:
     long long  time_stamp;          //类内全局变量，防止函数调用多次传参
 
     vector<time_angle> v_angle;
-    vector<time_angle> fit_diff;            //观测到的角度差数组
-    vector<time_angle> fit_speed;        //观测到的角度差数组
+    vector<time_angle> fit_speed;        //观测到的转速数组
+    vector<time_angle> fit_acc;          //加速度计算
 
+    int last_idx_acc =0;
+    int last_idx_spd =0;
 
 
     // Point2f tag_point;              //当前帧中待击打装甲板中心点
@@ -111,8 +118,8 @@ private:
     bool    is_sine_solved;         //正弦参数拟合完成标志位
     double  pre_angle=0;            //预测角度
 
+    int stride     = 1;       //记录步长
     //****常量*****//
-    const int stride     = 1;       //隔帧记录步长
     const Mat element3   = getStructuringElement(MORPH_RECT,Size(3,3));
     const Mat element3_5 = getStructuringElement(MORPH_RECT,Size(3,5));
     const Mat element5   = getStructuringElement(MORPH_RECT,Size(5,5));
@@ -121,8 +128,7 @@ private:
     const Mat element7_9 = getStructuringElement(MORPH_RECT,Size(7,9));
 
     ///调参部分
-    const int sample_size = 300;                                     //拟合采样数据数
-
+    const int sample_size = 600;                                     //拟合采样数据数
 
     //****函数区******//
     void taskInit();                                                //任务周期初始化
@@ -136,11 +142,15 @@ private:
 
     void getTargetPolarAngle();                                     //获取目标极坐标值
     void getInfo();                                                 //提取多帧间信息
+    void getTimeDura(vector<time_angle>&data,  int dura, int & start_idx, int & end_idx, int & last_idx);  //获取时间段对应点，单位ms
 
     void getDirection();
     float getChangeAngle(float deltaAngle);                       //获取跳转角度
     float predictAngle(uint8_t mode);
     void angle2points_PIX();
+    void angle2points_PIX(Point2f& point, double angle);
+
+    float getAcc();
 
 };
 

@@ -18,7 +18,8 @@
 #define image_height 768
 int cnt = 0;
 char *pRGB24Buf_0 = new char[image_width * image_height * 3];
-std::queue<pair<std::chrono::time_point<std::chrono::steady_clock>,cv::Mat>> img_buf;
+//std::queue<pair<std::chrono::time_point<std::chrono::steady_clock>,cv::Mat>> img_buf;
+pair<std::chrono::time_point<std::chrono::steady_clock>,cv::Mat> img_buf;
 std::mutex mImg_buf;
 extern Ptz_infor stm;
 /**
@@ -74,10 +75,11 @@ void Frame_0_ProcessRGB(GX_FRAME_CALLBACK_PARAM *pFrame) {
         //cv::Mat image_bgr;
         //cv::cvtColor(image_rgb24,image_bgr,CV_RGB2BGR);
         mImg_buf.lock();
-        if(img_buf.size()>2){
-            img_buf.pop();
-        }
-        img_buf.push(make_pair(t0, image_rgb24));
+//        if(img_buf.size()>2){
+//            img_buf.pop();
+//        }
+//        img_buf.push(make_pair(t0, image_rgb24));
+        img_buf = make_pair(t0, image_rgb24);
         mImg_buf.unlock();
         //cv::imshow("img_show: ",image_rgb24);
         //cv::waitKey(1);

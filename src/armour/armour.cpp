@@ -5,7 +5,7 @@
 #include "tool_fun.h"
 #include <mutex>
 
-extern std::queue<pair<std::chrono::time_point<std::chrono::steady_clock>, cv::Mat>> img_buf;
+extern pair<std::chrono::time_point<std::chrono::steady_clock>, cv::Mat> img_buf;
 extern SerialPort port;
 extern std::mutex mImg_buf;
 extern Ptz_infor stm;
@@ -625,6 +625,7 @@ void Armour::armour_tracking() {
  *
  */
 #define K_SPEED 10000
+
 [[noreturn]]void Armour::run() {
     if (!readCameraParameters(cameraParam)) {
         for (int i = 0; i < 100; ++i)
@@ -636,14 +637,18 @@ void Armour::armour_tracking() {
         auto ts = chrono::steady_clock::now();
         std::chrono::time_point<std::chrono::steady_clock> t1;
         double imu_p,imu_y;
+        if(img_buf.second.empty()){ continue;}
         mImg_buf.lock();
-        if (img_buf.size() > 0) {
-            std::cout << "img buff " << img_buf.size() << std::endl;
-            t1 = img_buf.front().first;
-            time_stamp = chrono::duration<double>(t1 - start_time).count();//s
-            src = img_buf.front().second.clone();
-            img_buf.pop();
-        }
+//        if (img_buf.size() > 0) {
+//            std::cout << "img buff " << img_buf.size() << std::endl;
+//            t1 = img_buf.front().first;
+//            time_stamp = chrono::duration<double>(t1 - start_time).count();//s
+//            src = img_buf.front().second.clone();
+//            img_buf.pop();
+//        }
+        t1 = img_buf.first;
+        time_stamp = chrono::duration<double>(t1 - start_time).count();//s
+        src = img_buf.second.clone();
         mImg_buf.unlock();
         if (!src.data) {
             continue;
@@ -674,8 +679,34 @@ void Armour::armour_tracking() {
         }
         STATE mode = getMode(port.receive[1]);
         switch (mode) {
-            case STATE_BUFF:
+            case STATE_BUFF:{
+                char cmd = 0x30;
+                int pp = chrono::duration<double,milli> (t1-start_time).count();
+                if(energy->run(src,pp,find_color_energy,port.receive[1],send_data.pitch,send_data.yaw,send_data.dis)){
+                    cmd = 0x31;
+                    energy->energy_last_flag = 1;
+                    energy->energy_last_send = send_data;
+                }else{
+                    if(energy->energy_last_flag){
+                        cmd = 0x31;
+                        send_data = energy->energy_last_send;
+                        energy->energy_last_flag = 0;
+                    }else{
+                        cmd = 0x30;
+                        send_data = {0,0,0};
+                    }
+                }
+                *(signed char *) &port.buff_w_[0] = int16_t(10000 * (send_data.pitch));
+                *(signed char *) &port.buff_w_[1] = int16_t((10000 * (send_data.pitch))) >> 8;
+                *(signed char *) &port.buff_w_[2] = int16_t(10000 * (send_data.yaw));
+                *(signed char *) &port.buff_w_[3] = int16_t((10000 * (send_data.yaw))) >> 8;
+                *(signed char *) &port.buff_w_[4] = int16_t(100 * send_data.dis);
+                *(signed char *) &port.buff_w_[5] = int16_t(100 * send_data.dis) >> 8;
+                port.SendBuff(cmd, port.buff_w_, 6);
+//                imshow("src",src);
+//                cv::waitKey(1);
                 break;
+            }
             default:
                 /// tracking roi test
                 fps_cnt++;

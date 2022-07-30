@@ -42,9 +42,9 @@ STATE getMode(char infor);
  * PARAMS FILE SELECT
  */
 /**==============  3 ================**/
-//#define cameraParam PROJECT_DIR"/config/cameraParams_156.xml"
-//#define Param PROJECT_DIR"/config/params3.yml"
-//#define cameraSN "KE0200120156"
+#define cameraParam PROJECT_DIR"/config/cameraParams_156.xml"
+#define Param PROJECT_DIR"/config/params3.yml"
+#define cameraSN "KE0200120156"
 /**==============  4 ================**/
 //#define cameraParam PROJECT_DIR"/config/cameraParams_061.xml"
 //#define Param PROJECT_DIR"/config/params4.yml"
@@ -54,9 +54,9 @@ STATE getMode(char infor);
 //#define Param PROJECT_DIR"/config/params5.yml"
 //#define cameraSN "KE0200120157"
 /**==============  6 ================**/
-#define cameraParam PROJECT_DIR"/config/cameraParams_332.xml"
-#define Param PROJECT_DIR"/config/params6.yml"
-#define cameraSN "KE0220060332"
+//#define cameraParam PROJECT_DIR"/config/cameraParams_332.xml"
+//#define Param PROJECT_DIR"/config/params6.yml"
+//#define cameraSN "KE0220060332"
 /**==============  End  ================**/
 #endif //CAM_POSE_CALIB_COMMON_H
 

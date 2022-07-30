@@ -6,7 +6,7 @@
       <paths name="infantry_3 (036331ec-ab2a-4581-94f0-0b393f82a3ee)">
         <serverdata>
           <mappings>
-            <mapping deploy="/workspace/autoshoot" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/workspace/infantry" local="$PROJECT_DIR$" web="/" />
           </mappings>
           <excludedPaths>
             <excludedPath local="true" path="$PROJECT_DIR$/build" />

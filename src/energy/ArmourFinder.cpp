@@ -7,13 +7,17 @@
 using namespace std;
 using namespace cv;
 
+//#define VEDIO_SHOOT
+//#define PLOT_SINE
+//#define PLOT_STEP
 extern SerialPort port;
 SolvePara solveFan;
-double SolvePara::params_fitting[4]={1,1.9,0,1};
+//double SolvePara::params_fitting[4]={1,1.9,0,1};
+double SolvePara::params_fitting[4]={0.9125,1.942,0,1.31};
 double SolvePara::PHI[1]={0};
 
-ParticleFilter pf;
-ParticleFilter pf_param_loader;
+
+
 ArmourFinder::ArmourFinder() {
     FileStorage fs(Param, FileStorage::READ);
     fs["energy"]["red_spilt_threshold"] >> r_spilt_threshold;
@@ -41,7 +45,7 @@ int ArmourFinder::searchArmour(Mat &src, long long timestamp, double p_time, con
 
     ///任务周期初始化///
     /// change  notion!!!!! init
-    if (!is_inited) { taskInit(); }
+    if (!is_inited) { taskInit();}
     ///识别部分///
     Init(timestamp, p_time);
     //预处理
@@ -52,8 +56,8 @@ int ArmourFinder::searchArmour(Mat &src, long long timestamp, double p_time, con
     if (!findtagpoint(src, find_color_energy)) { return -1; }
     //寻找R所在区域
     if (!getROIofR()) { return -1; }
-    // 寻找R标签 TODO：识别圆形换成R标签
-//    if (!findRinROI(src)) { return; }
+    // 寻找R标签
+//    if (!findRinROI(src)) { return-1; }
     if (!findRinROI(dst)) { return -1; }
 
     ///信息提取///
@@ -63,22 +67,46 @@ int ArmourFinder::searchArmour(Mat &src, long long timestamp, double p_time, con
     getInfo();
     //处理信息
     if ((!is_find_dir) && (mode)) {
-        getDirection();
-    }    //计算方向
+        getDirection();//计算方向
+    }
 
-    cout<<"-----------------"<<endl;
-    cout<<rotation_direction<<endl;
-    if(debug){
+    if(debug ||debug_no_img){
         std::cout<<"debug infor fan dir is "<<rotation_direction<<std::endl;
     }
+
+
     //角度预测
     if (predict_time == 0) {
         pre_point = tag_point;
         return 2;
     }
 
-    pre_angle = predictAngle(mode);
-    clog<<"pre_angle\n"<<pre_angle<<endl;
+//    pre_angle = predictAngle(mode);
+//    pre_angle = predictAngle(1);
+//    pre_angle = predictAngle(2);
+    pre_angle = predictAngle(3);
+//      pre_angle = predictAngle(4);
+
+//    pre_angle = (predictAngle(2)+ predictAngle(3))/2;
+
+
+//    double pre_angle_2 = predictAngle(2);
+//    double pre_angle_3 = predictAngle(3);
+//
+////    pre_angle = (pre_angle_2+pre_angle_3)/2;
+////    pre_angle = pre_angle_2;
+//
+////    pre_angle = pre_angle_3;
+//
+//    Point2f point_2, point_3;
+//    angle2points_PIX(point_2, pre_angle_2);
+//    circle(src,point_2,6,Scalar(255,0,0),-1);
+//    angle2points_PIX(point_3, pre_angle_3);
+//    circle(src,point_3,6,Scalar(0,0,255),-1);
+
+
+//    std::cout<<"debug infor fan dir is "<<rotation_direction<<std::endl;
+
     //像素层面计算坐标
     fan_.pre_point = pre_point;
     fan_.circle_center = circle_center_point;
@@ -86,7 +114,7 @@ int ArmourFinder::searchArmour(Mat &src, long long timestamp, double p_time, con
     fan_.armour_rect = min_tagbox;
     fan_.pre_angle = pre_angle;
     memcpy(fan_.armour_points, aim_box, 4 * sizeof (cv::Point2f));
-    angle2points_PIX();
+//    angle2points_PIX();
     return 1;
 }
 
@@ -99,7 +127,7 @@ void ArmourFinder::taskInit() {
     last_polar_angle = 0;
 
     is_find_dir = false;
-    rotation_direction = -2;
+    rotation_direction = 0;
     last_rotation_direction = -2;
     is_sine_solved = false;
 
@@ -111,6 +139,9 @@ void ArmourFinder::taskInit() {
     solveFan.is_sine_found = false;
     solveFan.is_phi_start = false;
     solveFan.is_phi_found = false;
+    last_idx_spd = 0;
+    last_idx_acc = 0;
+
 
     is_inited = true;
 }
@@ -175,15 +206,20 @@ void ArmourFinder::binImg(const Mat &src, Mat &dst, const int dealColor) {
         imshow("spilt", dst);
         imshow("green", green);
     }
-//    dst = dst & gray_bin & green;
-    dst = dst & gray_bin ;
-//    dst = gray_bin;
+    dst = dst & gray_bin & green;
+
+#ifdef VEDIO_SHOOT
+    dst = gray_bin;
+    erode(dst,dst,element3);
+#endif
+
     dilate(dst,dst, element5);
-   // erode(dst,dst,element5);
+    erode(dst,dst,element3);
     if(debug){
 //        imshow("gray", gray_bin);
         imshow("dst", dst);
     }
+//    imshow("dst", dst);
 }
 
 void ArmourFinder::binROI(const Mat &src, Mat &dst, const int team) {
@@ -191,6 +227,9 @@ void ArmourFinder::binROI(const Mat &src, Mat &dst, const int team) {
     cv::split(src, src_split_);
     if (src.empty()) { return; }
     cv::cvtColor(src, src_gray, CV_BGR2GRAY);
+
+    //src_bin
+    threshold(src_gray, src_bin, 0, 255, CV_THRESH_OTSU);
 
     if (team == 2) {//red
         subtract(src_split_[2], src_split_[0], src_separation);
@@ -203,8 +242,11 @@ void ArmourFinder::binROI(const Mat &src, Mat &dst, const int team) {
         dilate(src_separation, src_separation, element5);
         dilate(src_green,src_green, element5);
         dilate(src_green,src_green, element7);
-//        dst = src_separation & src_gray & src_green;
-        dst = src_separation & src_gray;
+        dst = src_separation & src_gray & src_green;
+
+#ifdef VEDIO_SHOOT
+        dst = src_gray;
+#endif
         //dilate(dst,dst,element3);
     } else {//blue
         subtract(src_split_[0], src_split_[2], src_separation);
@@ -216,15 +258,20 @@ void ArmourFinder::binROI(const Mat &src, Mat &dst, const int team) {
         dilate(src_separation, src_separation, element5);
         dilate(src_green,src_green, element5);
         dilate(src_green,src_green, element7);
-//        dst = src_separation & src_gray & src_green;
-        dst = src_separation & src_gray;
+        dst = src_separation & src_gray & src_green;
+//        dst = src_separation & src_gray;
     }
+
+//    imshow("dst22", dst);
+//    imshow("gray", src_gray);
+
+//    dst = dst&src_bin;
 
 
 //    imshow("separation", src_separation);
-////    imshow("src_green", src_green);
+//    imshow("src_green", src_green);
 //    imshow("gray", src_gray);
-//     imshow("dst", dst);
+//     imshow("dst12", dst);
 }
 
 bool ArmourFinder::findFans(const cv::Mat &src) {
@@ -271,9 +318,12 @@ bool ArmourFinder::findFans(const cv::Mat &src) {
         if (debug || debug_no_img) {
             cout << "area_rate: " << area_rate << '\t' << endl;
         }
-        if ((area_rate <= 0.6) && (area_rate > 0.40)) {
+//        if ((area_rate <= 0.6) && (area_rate > 0.40)) {
+            if ((area_rate <= 0.65) && (area_rate > 0.40)) {
 //            if(c_area>6000){continue;}
             Rect tmp = box.boundingRect();
+            if(!(0 <= tmp.x && 0 <= tmp.width && tmp.x + tmp.width <= src.cols && 0 <= tmp.y && 0 <= tmp.height && tmp.y + tmp.height <= src.rows))
+                continue;
             cv::Point tl = tmp.tl();
             // 限制 ROI 出界条件
             if (tl.x < 0) { tl.x = 0; }
@@ -313,8 +363,8 @@ bool ArmourFinder::findFans(const cv::Mat &src) {
 //            cv::circle(drawing, Point (480, 384), 3, Scalar(255, 0, 255), -1, 8);  //绘制最小外接矩形的中心点
             tag_point.x = 0;
             tag_point.y = 0;
-            imshow("轮廓图", drawing);
-            waitKey(1);
+//            imshow("轮廓图", drawing);
+//            waitKey(1);
         }
 
         if (tag_outline_con.empty()) { return false; }
@@ -326,7 +376,7 @@ bool ArmourFinder::findFans(const cv::Mat &src) {
 bool ArmourFinder::findtagpoint(Mat &dst, const int team) {
     tagROI = dst(tag_outline_con[0]);
 
-    //imshow("rroi",tagROI);
+//    imshow("rroi_src",tagROI);
     armor_contours.clear();
     armor_hierarchy.clear();
     armor_contours_external.clear();
@@ -334,7 +384,13 @@ bool ArmourFinder::findtagpoint(Mat &dst, const int team) {
     ////预处理部分
     if (tagROI.type() == CV_8UC3) {
         binROI(tagROI, tagROI, team);
+//        cvtColor(tagROI, tagROI, COLOR_BGR2GRAY);
+//        threshold(tagROI, tagROI, 150, 255, THRESH_OTSU);
+
     }
+#ifdef    PLOT_STEP
+    imshow("rroi",tagROI);
+#endif
 
     //第一步：分别筛选内外轮廓和外轮廓
 //    findContours(tagROI,armor_contours,armor_hierarchy,CV_RETR_LIST,CV_CHAIN_APPROX_SIMPLE);
@@ -368,6 +424,9 @@ bool ArmourFinder::findtagpoint(Mat &dst, const int team) {
 
         //最终得到理想装甲板矩阵所在轮廓
         min_tagbox = minAreaRect(armor_contours[i]);
+//        min_tagbox = minEnclosingCircle(armor_contours[i]);
+        if(armor_contours[i].size()<5){ continue;}
+//        min_tagbox = fitEllipse(armor_contours[i]);
         double area = min_tagbox.size.height * min_tagbox.size.width;
 
         double tmp_w = min_tagbox.size.width;
@@ -409,7 +468,7 @@ bool ArmourFinder::findtagpoint(Mat &dst, const int team) {
 }
 
 bool ArmourFinder::getROIofR() {
-    float k1 = 1.7;
+    float k1 = 4.5;
 
     float length = min_tagbox.size.height > min_tagbox.size.width ?
                    min_tagbox.size.height : min_tagbox.size.width;
@@ -444,10 +503,16 @@ bool ArmourFinder::findRinROI(Mat &src) {
         cvtColor(ROI, ROI, COLOR_BGR2GRAY);
         threshold(ROI, ROI, 150, 255, THRESH_OTSU);
     }
-//    dilate(ROI, ROI, element3);
+
     erode(ROI, ROI, element3);
+    dilate(ROI, ROI, element3);
+    dilate(ROI, ROI, element3);
+    erode(ROI, ROI, element3);
+    dilate(ROI, ROI, element3);
+    erode(ROI, ROI, element3);
+
 //    erode(ROI, ROI, element3);
-    erode(ROI, ROI, element3);
+//    erode(ROI, ROI, element3);
 
     std::vector<vector<Point> > center_R_contours;
     findContours(ROI, center_R_contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
@@ -459,11 +524,7 @@ bool ArmourFinder::findRinROI(Mat &src) {
         RotatedRect box = minAreaRect(center_R_contours[i]);
         double c_area = contourArea(center_R_contours[i]);
 
-//        if(r_area<240){continue;}
-//        cout<<r_area<<endl;
-
-        if (c_area < 100 || c_area > 450) { continue; }
-//        cout<<"c_area"<<c_area<<endl;
+        if (c_area < 150 || c_area > 600) { continue; }
 
         ///通过长宽比筛选掉不合适的区域
         int height = box.size.height;
@@ -472,6 +533,7 @@ bool ArmourFinder::findRinROI(Mat &src) {
         float peri_rate = height / width;//筛掉长宽比不合适的轮廓
 //        cout<<"peri_rate"<<peri_rate<<endl;
         if (peri_rate > 1.2) { continue; }
+//        cout<<"c_area"<<c_area<<endl;
 
         Point2f center_tmp;
         float radius_tmp;
@@ -498,6 +560,10 @@ bool ArmourFinder::findRinROI(Mat &src) {
     return false;
 }
 
+//cv::FileStorage angle_deg_write("../angle_deg.yaml", cv::FileStorage::WRITE);
+//cv::FileStorage angle_rad_2pi_write("../angle_rad_2pi.yaml", cv::FileStorage::WRITE);
+
+
 void ArmourFinder::getTargetPolarAngle() {
     target_polar_angle = tool::Arctan(tag_point.y - circle_center_point.y ,tag_point.x - circle_center_point.x);
 
@@ -507,8 +573,11 @@ void ArmourFinder::getTargetPolarAngle() {
 
 }
 
+//cv::FileStorage X_write("../time_stamp.yaml", cv::FileStorage::WRITE);
+//cv::FileStorage Y_write("../spd.yaml", cv::FileStorage::WRITE);
+
 const int rows = 500;
-const int cols = 1000;
+const int cols = 1500;
 Mat plot_all =Mat::zeros(rows,cols, CV_8UC3);
 int plot_cnt = 0;
 
@@ -518,6 +587,10 @@ void ArmourFinder::getInfo() {
     //帧间角度差，判断扇叶是否发生切换
     float polar_angle_diff = last_polar_angle - target_polar_angle;
     float abs_angle = fabs(polar_angle_diff);
+
+    ///判断当前需要拟合的参数
+    if(!solveFan.is_sine_found){stride = 1;}
+    else{stride=1;}
 
     if (abs_angle > 0.9 && abs_angle < 6.0) {
 //        is_target_changed = true;
@@ -531,65 +604,73 @@ void ArmourFinder::getInfo() {
 
     ///历史信息处理
     if (v_angle.size() > 1 + stride) {
+
         int idx = v_angle.size() - 1;
         int idx_before = idx - stride;
         float angleDifference = 0;
         if (target_changed_delay) {
             angleDifference =
                     fmod(abs(v_angle[idx].y - getChangeAngle(polar_angle_diff) - v_angle[idx_before].y)+ CV_2PI, CV_2PI);
-//                    fmod(abs(v_angle[idx].y - getChangeAngle(polar_angle_diff) - v_angle[idx_before].y)+ CV_2PI, CV_2PI);
-//            (abs(v_angle[idx].y - getChangeAngle(polar_angle_diff) - v_angle[idx_before].y));
-        } else{
+        }
+        else
+        {
             angleDifference = fmod(abs(v_angle[idx].y - v_angle[idx_before].y)+ CV_2PI, CV_2PI);
-//            angleDifference = abs(v_angle[idx].y - v_angle[idx_before].y);
-//          float angleDifference_2 =(v_angle[idx].y - v_angle[idx_before].y);
         }
 
-        fit_diff.emplace_back(time_stamp, angleDifference);
-
-        if (fit_diff.size() > sample_size) {
-            fit_diff.erase(fit_diff.begin());
-        }
-
-        if(fit_diff.size()>0){
-
-            double span = double(time_stamp - fit_diff[fit_diff.size()-2].x)/1000;  //s
+            double span = double(v_angle[idx].x - v_angle[idx_before].x);  //s
+//            double span = double(v_angle[idx].x - v_angle[idx_before].x);  //s
             //时间间隔限制
-            if(span >0){
-//                cout<<"---------------------------------------------\n";
-//                cout<<"----------------------span-------------------\n"<<span<<endl;
-//                cout<<"---------------------------------------------\n";
+            if(span >0) {
+//                cout << "---------------------------------------------\n";
+//                cout << "----------------------span-------------------\n" << span/1000 << endl;
+//                cout << "---------------------------------------------\n";
                 float cur_spd =
-                        fmod( abs(angleDifference) + CV_2PI,  CV_2PI)/span;
+                        fmod(abs(angleDifference) + CV_2PI, CV_2PI)*1000 / span;
+//                fmod(abs(angleDifference) + CV_2PI, CV_2PI) *1000/ span;
 
-                float  cur_spd_2 = cur_spd;
+//                float cur_spd_2 = cur_spd;
                 //不要小瞧沈航人.jpg （沈航RMer确实很强，这句话是智能车竞赛一个沈航老师有趣的梗）
                 auto is_ready = pf.is_ready;
                 Eigen::VectorXd measure(1);
-                measure<<cur_spd;
+                measure << cur_spd;
                 pf.update(measure);
-                if (is_ready){
+                if (is_ready) {
                     auto predict = pf.predict();
                     cur_spd = predict[0];
                 }
-
                 fit_speed.emplace_back(time_stamp, cur_spd);
-
                 if (fit_speed.size() > sample_size) {
                     fit_speed.erase(fit_speed.begin());
+//                    Y_write<<"spd"<<cur_spd;
+//                    X_write<<"time_stamp"<<int(time_stamp);
                 }
 
-//                ////记录下每帧
-//                cv::circle(plot_all,Point2f(fmod(plot_cnt,cols), rows-(cur_spd/5*rows)),2, Scalar(0,255,0));
-//                plot_cnt++;
-//                if(fmod(plot_cnt,cols) == 0){plot_all =Mat::zeros(rows,cols, CV_8UC3);}
-//                imshow("plot_1",plot_all);
-//                waitKey(1);
+                if(fit_speed.size()!=0){
+                    int idx = fit_speed.size() - 1;
+                    int idx_before = idx - 1;
+                    double span_acc = double(fit_speed[idx].x - fit_speed[idx_before].x)/1000;
+                    float det = fit_speed[idx].y - fit_speed[idx_before].y;
+                    float a = det/span_acc;
+                    fit_acc.emplace_back(time_stamp, det/span_acc);
+                    if(fit_acc.size()>sample_size){
+                        fit_acc.erase(fit_acc.begin());
+                    }
+                }
 
+
+#ifdef PLOT_SINE
+//                ////记录下每帧
+//                cv::circle(plot_all, Point2f(fmod(plot_cnt, cols), rows - (cur_spd / 30 * rows)), 2, Scalar(0, 255, 0));
+                cv::circle(plot_all, Point2f(fmod(plot_cnt, cols), rows - (cur_spd / 5 * rows)), 2, Scalar(0, 255, 0));
+                cv::circle(plot_all, Point2f(fmod(plot_cnt, cols), rows - (target_polar_angle / 30 * rows)), 2,
+                           Scalar(0, 90, 255));
+                plot_cnt++;
+                if (fmod(plot_cnt, cols) == 0) { plot_all = Mat::zeros(rows, cols, CV_8UC3); }
+                imshow("plot_1", plot_all);
+                waitKey(1);
+#endif
 
             }
-
-        }
     }
 
     //更新
@@ -624,9 +705,9 @@ void ArmourFinder::getDirection() {
 //    cout<<last_rotation_direction<<endl;
 //    cout<<"-----------------"<<endl;
 
-    if (v_angle.size() >= 30) {
+    if (v_angle.size() >= 20) {
         int stop = 0, clockwise = 0, counter_clockwise = 0;
-        for (size_t i = 0; i < 25; i++) {
+        for (size_t i = 0; i < 15; i++) {
 //            float angle_diff = tool::rad2deg(v_angle[i + 15].y) - tool::rad2deg(v_angle[i].y);
 
             float angle_1 = tool::rad2deg(v_angle[i + 3].y);
@@ -658,20 +739,67 @@ void ArmourFinder::getDirection() {
 }
 
 float ArmourFinder::predictAngle(uint8_t mode) {
-    if (mode == 0) { return 0; }
+    if (mode == 0 || rotation_direction==0 ) { return 0; }
     else if (mode == 1) {       //小符
             return  rotation_direction * tool::deg2rad(60 * predict_time);
-
     } else if (mode == 2) {     //大符
-
         //拟合
-        solveFan.solvePara(fit_speed);
+         solveFan.solvePara(fit_speed);
         if(!solveFan.is_sine_found||!solveFan.is_phi_found){return 0;}
         //预测
         double time_passed=((float)(time_stamp-solveFan.start_time))/1000;
-//        return  rotation_direction * solveFan.pos_fun(predict_time+time_passed) - solveFan.pos_fun(time_passed);
         return  rotation_direction * (solveFan.pos_fun(predict_time+time_passed) - solveFan.pos_fun(time_passed));
     }
+    else if(mode == 3){
+        return rotation_direction * getAcc();
+    }
+    else if(mode == 4){
+        //拟合
+        solveFan.solvePara(fit_speed);
+        if(!solveFan.is_sine_found||!solveFan.is_phi_found){
+//            cout<<"--------------here---------------"<<endl;
+            return rotation_direction * getAcc();
+        }
+        //预测
+        double time_passed=((float)(time_stamp-solveFan.start_time))/1000;
+        return  rotation_direction * (solveFan.pos_fun(predict_time+time_passed) - solveFan.pos_fun(time_passed));
+    }
+}
+
+float ArmourFinder::getAcc(){
+
+    if(fit_acc.size()<10){return 0;}
+
+//    int dura = 50;
+//    int dura = 100;
+    int dura = 50;
+    double sum_acc = 0;
+    double sum_spd = 0;
+
+    int start_idx, end_idx;
+
+    getTimeDura(fit_speed, dura, start_idx, end_idx, last_idx_acc);
+    for(int i=start_idx; i<end_idx; i++){
+        sum_acc += fit_acc[i].y;
+    }
+    int num_spd ;
+    int num_acc = num_spd= end_idx - start_idx;
+
+//    getTimeDura(fit_speed, dura, start_idx, end_idx, last_idx_spd);
+    for(int i=start_idx; i<end_idx; i++){
+        sum_spd += fit_speed[i].y;
+    }
+//    int num_spd = end_idx - start_idx;
+
+//    int time =  fit_acc[sz-1].x - start_idx;
+    cout<<"-------------------acc-------------------"<<sum_acc/num_acc<<endl;
+    cout<<"-------------------spd-------------------"<<sum_spd/num_spd<<endl;
+
+    float mean_acc = sum_acc/num_acc;
+    float mean_spd = sum_spd/num_spd;
+
+    float pass_angle = mean_spd *predict_time + mean_acc*predict_time*predict_time/2;
+    return pass_angle;
 }
 
 void ArmourFinder::angle2points_PIX() {
@@ -680,4 +808,31 @@ void ArmourFinder::angle2points_PIX() {
     float d_y = tag_point.y - circle_center_point.y;
     pre_point.x = d_x * cos(pre_angle) - d_y * sin(pre_angle) + circle_center_point.x;
     pre_point.y = d_x * sin(pre_angle) + d_y * cos(pre_angle) + circle_center_point.y;
+}
+
+void ArmourFinder::angle2points_PIX(Point2f& point, double angle) {
+
+    float d_x = tag_point.x - circle_center_point.x;
+    float d_y = tag_point.y - circle_center_point.y;
+    point.x = d_x * cos(angle) - d_y * sin(angle) + circle_center_point.x;
+    point.y = d_x * sin(angle) + d_y * cos(angle) + circle_center_point.y;
+}
+
+
+
+//单位ms
+void ArmourFinder::getTimeDura(vector<time_angle>&data,  int dura, int & start_idx, int & end_idx, int & last_idx){
+    end_idx = data.size() - 1;
+    start_idx = data.size() -1;
+
+    if(last_idx!=0){last_idx+20>end_idx ? start_idx=end_idx : start_idx = last_idx+20;}
+    for (int i = end_idx; i >0 ; i--) {
+        start_idx  =i;
+        if((data[end_idx].x - data[start_idx].x)>dura){
+            cout<<"-------time_dura---------"<<(data[end_idx].x - data[start_idx].x)<<endl;
+            cout<<"---start_idx---"<<start_idx<<"---end_idx---"<<end_idx<<endl;
+            break;
+        }
+    }
+    last_idx = start_idx;
 }
