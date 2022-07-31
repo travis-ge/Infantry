@@ -29,19 +29,19 @@ struct camera_config {
     //设置是否自动曝光
     int ExposureAuto = 0;
     //设置固定曝光时间(单位:um)
-    double Exposure = 1000.0;//2000
+    double Exposure = 4000.0;//2000
     //设置自动曝光时间下限(单位:um)
     double MinExposure = 100.0;
     //设置自动曝光时间上限(单位:um)
     double MaxExposure = 50000.0;
     //是否进行自动白平衡
-    int BalanceAuto = 0;
+    int BalanceAuto = 1;
     //选择白平衡通道
     int BalanceSelector = 1;
     //设置白平衡系数
     double BalanceRatio = 1;
     //是否进行自动增益
-    int GainAuto = 0;
+    int GainAuto = 1;
     //选择增益通道
     int GainSelector = 0;
     //设置增益值

@@ -74,17 +74,19 @@ int ArmourFinder::searchArmour(Mat &src, long long timestamp, double p_time, con
         std::cout<<"debug infor fan dir is "<<rotation_direction<<std::endl;
     }
 
-
     //角度预测
     if (predict_time == 0) {
         pre_point = tag_point;
+        fan_.tag_point = tag_point;
+        fan_.armour_rect = min_tagbox;
+        memcpy(fan_.armour_points, aim_box, 4 * sizeof (cv::Point2f));
         return 2;
     }
 
 //    pre_angle = predictAngle(mode);
 //    pre_angle = predictAngle(1);
 //    pre_angle = predictAngle(2);
-    pre_angle = predictAngle(3);
+    pre_angle = predictAngle(mode);
 //      pre_angle = predictAngle(4);
 
 //    pre_angle = (predictAngle(2)+ predictAngle(3))/2;

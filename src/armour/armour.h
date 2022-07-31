@@ -83,7 +83,8 @@ private:
     int b_green_threshold;
     int light_contour_min;
     int last_id = -1;
-    shared_ptr<Classifier> numClass;
+//    shared_ptr<Classifier> numClass;
+    shared_ptr<NumClassifier> numClass;
     shared_ptr<AngleSolver> angleSolver;
     shared_ptr<EKFPredictor> ekf;
     shared_ptr<Energy> energy;

@@ -280,7 +280,7 @@ int Classifier::numPredict(cv::Mat &src) {
     gammaTransform(src,src,0.3);
     threshold(src, src, 0 ,255,cv::THRESH_OTSU);
     cv::resize(src, src, cv::Size(28,28));
-//    cv::imshow("asmple", src);
+//    cv::imshow("sample", src);
     //处理HOG特征
 
     hog->compute(src, descriptors, cv::Size(7, 7)); //Hog特征计算，检测窗口移动步长(1,1)

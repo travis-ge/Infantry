@@ -6,7 +6,7 @@
 #include "common.h"
 #include "base.h"
 
-//#define PLOT_DRAW
+#define PLOT_DRAW
 
 using namespace cv;
 using namespace std;
@@ -168,9 +168,11 @@ bool Energy::getCamP(cv::Point2f *points) {
 
     cv::solvePnP(cv::Mat(realCorners), cv::Mat(cameraCorners), camMatrix, distCoeffs, rvec, tvec, false);
 
-    double Z = tvec.at<double>(2, 0);
-    double X = tvec.at<double>(0,0);
-    double Y = tvec.at<double>(1,0);
+    double Z = tvec.at<double>(2, 0) - 0.4;
+//    double X = tvec.at<double>(0,0);
+//    double Y = tvec.at<double>(1,0);
+    double X = (points[0].x - cx) * Z / fx ;
+    double Y = (points[0].y - cy) * Z / fy ;
 
     camEnergyP = Point3f (X,Y,Z);
     return true;
@@ -201,14 +203,12 @@ void Energy::getPredicPoints(cv::Point2f center, cv::Point2f src_P, cv::Point2f 
  */
 bool Energy::run(cv::Mat &src, int time_stamp, int find_color_energy, char mode,double & p, double &y, double &d) {
     int mode_chose;
-    if(mode == 'a'){mode_chose = 1;}   //small
-    if (mode == 'b'){mode_chose = 2;}  //big
-
-    mode_chose = 2;
+    if(mode == 'a'){mode_chose = 3;}   //big 2(ceres)  3(acc)
+    if (mode == 'b'){mode_chose = 1;}  //big
 //    mode_chose = 1;
 //    std::cout<<"buff predict time "<<predict_time<<std::endl;
 //    int finder_status  = finder->searchArmour(src,time_stamp,predict_time+0.05, find_color_energy,mode_chose);
-    int finder_status  = finder->searchArmour(src,time_stamp,predict_time+0.05, find_color_energy,mode_chose);
+    int finder_status  = finder->searchArmour(src,time_stamp,predict_time + 0.05, find_color_energy,mode_chose);
     if(!finder_status||finder_status==-1){
         return false;
     }
@@ -222,12 +222,14 @@ bool Energy::run(cv::Mat &src, int time_stamp, int find_color_energy, char mode,
     }
 
     if(finder_status == 2){
-        ;
+        getCamP(cameraPoints);
+        angleSolver->getAngle(camEnergyP,p,y,d);
+        draw_energy_target(src,finder->fan_.armour_points,center);
+        return true;
     }else if(finder_status == 1){
         cv::Point2f precamP[5];
         for (int i = 0; i < 5; i++) {
             getPredicPoints(finder->circle_center_point,cameraPoints[i], precamP[i],finder->fan_.pre_angle);
-
         }
         circle(src,precamP[0],10,Scalar(0,255,0),-1);
 #ifdef PLOT_DRAW
@@ -244,11 +246,12 @@ bool Energy::run(cv::Mat &src, int time_stamp, int find_color_energy, char mode,
         }else{
             getCamP(precamP);
             angleSolver->getAngle(camEnergyP,p,y,d);
-            d = 7.1;
+//            d = 7.1;
             last_p = p;
             last_y = y;
             last_d = d;
             double dis = (d + Dis_last)/2;
+            std::cout<<"energy dis "<<dis<<std::endl;
             predict_time = dis / stm.bulletSpeed;
             Dis_last = dis;
         }

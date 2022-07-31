@@ -32,11 +32,11 @@ public:
     cv::Point3f camEnergyP;
     Send energy_last_send;
     uint8_t energy_last_flag = 0;
+    std::shared_ptr<ArmourFinder> finder;
 private:
     cv::Mat camMatrix;
     cv::Mat distCoeffs;
     double Dis_last=6.4;
-    std::shared_ptr<ArmourFinder> finder;
     std::shared_ptr<AngleSolver> angleSolver;
     double predict_time = 0.24;
     double last_p = 0;

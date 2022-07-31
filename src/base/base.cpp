@@ -127,14 +127,16 @@ void AngleSolver::getAngle(cv::Point3f cam_, double &pitch, double &yaw, double 
     }
     std::cout<<"ssssssss"<<std::endl;
     pitch = -abs_pitch - ptz_pitch;
-    pitch += simple_pitch_diff;//-0.010
-    yaw += simple_yaw_diff;//-0.023
 
-    if (port.receive[1] == 'b' || port.receive[1] == 'a') {
+    if (port.receive[1] == 'b' || port.receive[1] == 'a' || stm.bulletSpeed > 25) {
         std::cout << "buff add666" << std::endl;
         pitch += buff_pitch_diff;//0.01
         yaw += buff_yaw_diff;//0.001
+    }else{
+        pitch += simple_pitch_diff;//-0.010
+        yaw += simple_yaw_diff;//-0.023
     }
+
 }
 void AngleSolver::getAngle_nofix(cv::Point3f cam_, double &pitch, double &yaw, double &Dis) {
     cv::Point3f gun_ = cam2gun(cam_, cam2gunDiff);

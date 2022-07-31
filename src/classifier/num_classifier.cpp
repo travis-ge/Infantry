@@ -16,10 +16,19 @@ NumClassifier::NumClassifier(const std::string &model_path, const std::string &l
         class_name_.push_back(line[0]);
     }
 }
-
+/**
+ * 7 qianshaozhan  ? sentry
+ * 0 jidi xiaozhuangjia
+ *
+ * @param src
+ * @return
+ */
 int NumClassifier::predict(cv::Mat &src) {
     cv::cvtColor(src,src,CV_BGR2GRAY);
+//    cv::imshow("sssss",src);
     cv::threshold(src,src,0,255,CV_THRESH_OTSU);
+//    cv::imshow("num",src);
+//    cv::waitKey(1);
     src = src / 255.0;
     cv::Mat blob;
     cv::dnn::blobFromImage(src,blob,1.,cv::Size(28,20));

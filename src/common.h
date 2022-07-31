@@ -40,6 +40,7 @@ STATE getMode(char infor);
 
 /**
  * PARAMS FILE SELECT
+ * note: PC of infantry 4 has moved to infantry 5 (2022.7.30)
  */
 /**==============  3 ================**/
 #define cameraParam PROJECT_DIR"/config/cameraParams_156.xml"

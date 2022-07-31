@@ -96,7 +96,9 @@ void Frame_0_ProcessRGB(GX_FRAME_CALLBACK_PARAM *pFrame) {
  *
  * @param information
  * @return
+ *  shift+B = a
  */
+
 STATE getMode(char infor){
     STATE mode;
     if(infor == 'b' || infor == 'a')

@@ -29,7 +29,7 @@ base:
   simple_yaw_diff: 0.00
   sentry_pitch_diff: -0.005
   sentry_yaw_diff: -0.018
-  buff_pitch_diff: 0.01
+  buff_pitch_diff: 0.005
   buff_yaw_diff: 0.001
 
 ekf:

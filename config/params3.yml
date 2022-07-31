@@ -3,13 +3,13 @@
 # old
 armour:
   debug: 0
-  red_spilt_threshold: 160
+  red_spilt_threshold: 95
   red_gray_threshold: 120
   red_green_threshold: 160
   blue_spilt_threshold: 80
-  blue_gray_threshold: 110
+  blue_gray_threshold: 125
   blue_green_threshold: 60
-  light_contour_min: 15
+  light_contour_min: 5
 
 energy:
   debug: 0
@@ -26,11 +26,11 @@ energy:
 
 base:
   simple_pitch_diff: 0.0
-  simple_yaw_diff: -0.025
+  simple_yaw_diff: -0.015
   sentry_pitch_diff: 0.007
   sentry_yaw_diff: -0.001
-  buff_pitch_diff: 0.00
-  buff_yaw_diff: 0.015
+  buff_pitch_diff: 0.008
+  buff_yaw_diff: -0.018
 ekf:
   # predict
   Q00: 0.1

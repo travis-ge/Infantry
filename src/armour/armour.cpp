@@ -4,12 +4,15 @@
 #include "common.h"
 #include "tool_fun.h"
 #include <mutex>
+#include "camera_api.h"
 
 extern pair<std::chrono::time_point<std::chrono::steady_clock>, cv::Mat> img_buf;
 extern SerialPort port;
 extern std::mutex mImg_buf;
 extern Ptz_infor stm;
 extern Send send_data;
+extern bool expose_time_reset;
+extern bool expose_time_set;
 float armour_small_pt[5][2] = {
         0.0, 0.0,
         0.0675, 0.0,
@@ -37,7 +40,8 @@ Armour::Armour() {
     fs1["armour"]["debug"] >> debug;
     fs1["armour"]["light_contour_min"] >> light_contour_min;
     fs1.release();
-    numClass = make_shared<Classifier>();
+//    numClass = make_shared<Classifier>();
+    numClass = make_shared<NumClassifier>(PROJECT_DIR"/config/fc.onnx",PROJECT_DIR"/config/label.txt",0.6);
     angleSolver = make_shared<AngleSolver>();
     ekf = make_shared<EKFPredictor>();
     energy = make_shared<Energy>();
@@ -67,6 +71,57 @@ bool Armour::readCameraParameters(string filename) {
 // * @param dst
 // * @param team
 // */
+//void Armour::imgPretreatment(const cv::Mat &src, cv::Mat &dst, int team) {
+//    cv::split(src, src_split_);
+//    cv::cvtColor(src, src_gray, CV_BGR2GRAY);
+//    if (debug) {
+//        namedWindow("armour", CV_WINDOW_AUTOSIZE);
+//    }
+//    if (team == 2) {//red
+//        if (debug) {
+//            cvCreateTrackbar("r_spilt_threshold", "armour", &r_spilt_threshold, 255);
+//            cvCreateTrackbar("r_gray_threshold", "armour", &r_gray_threshold, 255);
+//            cvCreateTrackbar("r_green_threshold", "armour", &r_green_threshold, 255);
+//        }
+//        subtract(src_split_[2], src_split_[0], src_separation);
+//        subtract(src_split_[2], src_split_[1], src_green);
+//        threshold(src_separation, src_separation, r_spilt_threshold, 255, cv::THRESH_BINARY);
+//        threshold(src_gray, src_gray, r_gray_threshold, 255, cv::THRESH_BINARY);
+//        threshold(src_green, src_green, r_green_threshold, 255, cv::THRESH_BINARY);
+//        dilate(src_green, src_green, element5_7);
+//        dilate(src_green, src_green, element7_9);
+//        dilate(src_separation, src_separation, element3_5);
+//        dilate(src_separation, src_separation, element5_7);
+//        erode(src_separation, src_separation, element3_5);
+//        dst = src_separation & src_gray & src_green;
+//    } else {//blue
+//        if (debug) {
+//            cvCreateTrackbar("b_spilt_threshold", "armour", &b_spilt_threshold, 255);
+//            cvCreateTrackbar("b_gray_threshold", "armour", &b_gray_threshold, 255);
+//            cvCreateTrackbar("b_green_threshold", "armour", &b_green_threshold, 255);
+//        }
+//        subtract(src_split_[0], src_split_[2], src_separation);
+//        subtract(src_split_[0], src_split_[1], src_green);
+//        threshold(src_separation, src_separation, b_spilt_threshold, 255, cv::THRESH_BINARY);
+//        threshold(src_gray, src_gray, b_gray_threshold, 255, cv::THRESH_BINARY);
+//        threshold(src_green, src_green, b_green_threshold, 255, cv::THRESH_BINARY);
+//        dilate(src_green, src_green, element5_7);
+//        dilate(src_green, src_green, element7_9);
+//
+//        dilate(src_separation, src_separation, element3_5);
+//        dilate(src_separation, src_separation, element5_7);
+//        erode(src_separation, src_separation, element3_5);
+//        dst = src_separation & src_gray & src_green;
+//        dilate(dst, dst, element3_5);
+//        erode(dst, dst, element3_5);
+//    }
+//    if (debug) {
+//        imshow("dst", dst);
+//        imshow("gray", src_gray);
+//        imshow("green", src_green);
+//        cv::waitKey(1);
+//    }
+//}
 void Armour::imgPretreatment(const cv::Mat &src, cv::Mat &dst, int team) {
     cv::split(src, src_split_);
     cv::cvtColor(src, src_gray, CV_BGR2GRAY);
@@ -77,48 +132,30 @@ void Armour::imgPretreatment(const cv::Mat &src, cv::Mat &dst, int team) {
         if (debug) {
             cvCreateTrackbar("r_spilt_threshold", "armour", &r_spilt_threshold, 255);
             cvCreateTrackbar("r_gray_threshold", "armour", &r_gray_threshold, 255);
-            cvCreateTrackbar("r_green_threshold", "armour", &r_green_threshold, 255);
         }
-        subtract(src_split_[2], src_split_[0], src_separation);
-        subtract(src_split_[2], src_split_[1], src_green);
+        subtract(src_split_[2], src_split_[1], src_separation);
         threshold(src_separation, src_separation, r_spilt_threshold, 255, cv::THRESH_BINARY);
         threshold(src_gray, src_gray, r_gray_threshold, 255, cv::THRESH_BINARY);
-        threshold(src_green, src_green, r_green_threshold, 255, cv::THRESH_BINARY);
-        dilate(src_green, src_green, element5_7);
-        dilate(src_green, src_green, element7_9);
-        dilate(src_separation, src_separation, element3_5);
-        dilate(src_separation, src_separation, element5_7);
-        erode(src_separation, src_separation, element3_5);
-        dst = src_separation & src_gray & src_green;
+        dilate(src_separation, src_separation, element7_9);
+        dst = src_separation & src_gray;
     } else {//blue
         if (debug) {
             cvCreateTrackbar("b_spilt_threshold", "armour", &b_spilt_threshold, 255);
             cvCreateTrackbar("b_gray_threshold", "armour", &b_gray_threshold, 255);
-            cvCreateTrackbar("b_green_threshold", "armour", &b_green_threshold, 255);
         }
-        subtract(src_split_[0], src_split_[2], src_separation);
-        subtract(src_split_[0], src_split_[1], src_green);
+        subtract(src_split_[0], src_split_[1], src_separation);
         threshold(src_separation, src_separation, b_spilt_threshold, 255, cv::THRESH_BINARY);
         threshold(src_gray, src_gray, b_gray_threshold, 255, cv::THRESH_BINARY);
-        threshold(src_green, src_green, b_green_threshold, 255, cv::THRESH_BINARY);
-        dilate(src_green, src_green, element5_7);
-        dilate(src_green, src_green, element7_9);
-
-        dilate(src_separation, src_separation, element3_5);
-        dilate(src_separation, src_separation, element5_7);
-        erode(src_separation, src_separation, element3_5);
-        dst = src_separation & src_gray & src_green;
-        dilate(dst, dst, element3_5);
-        erode(dst, dst, element3_5);
+        dilate(src_separation,src_separation,element7_9);
+        dst = src_separation & src_gray;
     }
     if (debug) {
         imshow("dst", dst);
         imshow("gray", src_gray);
-        imshow("green", src_green);
+        imshow("sep", src_separation);
         cv::waitKey(1);
     }
 }
-
 
 /**
  *
@@ -150,7 +187,7 @@ bool Armour::armourDetector(const Mat &src) {
             lightBar.size.width = lightBar_minAreaRect.size.width;
         }
 
-        if ((lightBar.size.width / lightBar.size.height) > 1)
+        if ((lightBar.size.width / lightBar.size.height) > 0.8)
             continue;
         int x = lightBar.center.x - lightBar.size.width;
         if (x < 0)
@@ -360,7 +397,7 @@ bool Armour::armourSort(void) {
             swap(srcRect[1], srcRect[3]);
         }
         float scale_x = 0.2;
-        float scale_y = 0.6;
+        float scale_y = 0.4;
         //高度上,默认放大
         srcRect[0].y -= height * scale_y;
         srcRect[1].y -= height * scale_y;
@@ -384,11 +421,11 @@ bool Armour::armourSort(void) {
         } else
             warpPerspective(src, src1, transform, Size(width, height));
 //        imshow("warp after", src1);
-//        cv::waitKey(1);
-        int num = 3;
+        int num = -1;
         ///recognize number
 //        num = numClass->numPredict(src1);
-        if (num < 1) {
+        num = numClass->predict(src1);
+        if (num > 7) {
             i = tmp_armour_vec.erase(i);
             continue;
         } else {
@@ -633,10 +670,11 @@ void Armour::armour_tracking() {
     }
     int img_cnt = 0;
     auto start_time = chrono::steady_clock::now();
+    STATE last_mode;
+    std::chrono::time_point<std::chrono::steady_clock> last_time;
     while (true) {
         auto ts = chrono::steady_clock::now();
         std::chrono::time_point<std::chrono::steady_clock> t1;
-        double imu_p,imu_y;
         if(img_buf.second.empty()){ continue;}
         mImg_buf.lock();
 //        if (img_buf.size() > 0) {
@@ -649,6 +687,7 @@ void Armour::armour_tracking() {
         t1 = img_buf.first;
         time_stamp = chrono::duration<double>(t1 - start_time).count();//s
         src = img_buf.second.clone();
+        img_buf.second.release();
         mImg_buf.unlock();
         if (!src.data) {
             continue;
@@ -680,6 +719,10 @@ void Armour::armour_tracking() {
         STATE mode = getMode(port.receive[1]);
         switch (mode) {
             case STATE_BUFF:{
+                std::cout<<"MODE BUFF "<<std::endl;
+                if(mode != last_mode){
+                    energy->finder->is_inited = false;
+                }
                 char cmd = 0x30;
                 int pp = chrono::duration<double,milli> (t1-start_time).count();
                 if(energy->run(src,pp,find_color_energy,port.receive[1],send_data.pitch,send_data.yaw,send_data.dis)){
@@ -696,6 +739,7 @@ void Armour::armour_tracking() {
                         send_data = {0,0,0};
                     }
                 }
+                cv::waitKey(1);
                 *(signed char *) &port.buff_w_[0] = int16_t(10000 * (send_data.pitch));
                 *(signed char *) &port.buff_w_[1] = int16_t((10000 * (send_data.pitch))) >> 8;
                 *(signed char *) &port.buff_w_[2] = int16_t(10000 * (send_data.yaw));
@@ -703,12 +747,14 @@ void Armour::armour_tracking() {
                 *(signed char *) &port.buff_w_[4] = int16_t(100 * send_data.dis);
                 *(signed char *) &port.buff_w_[5] = int16_t(100 * send_data.dis) >> 8;
                 port.SendBuff(cmd, port.buff_w_, 6);
-//                imshow("src",src);
-//                cv::waitKey(1);
                 break;
             }
             default:
                 /// tracking roi test
+                if(expose_time_reset){
+                    expose_time_reset = false;
+                    expose_time_set = false;
+                }
                 fps_cnt++;
                 if (fps_cnt > 10) {
                     fps_cnt = losing_cnt = find_cnt = 0;
@@ -736,16 +782,21 @@ void Armour::armour_tracking() {
                 std::cout << "<< ===== AUTO AIM RUNNING !!!! ===== >>" << std::endl;
                 std::cout << "<< ===== ARMOUR ROI STATUS " << (int) roi_ready << std::endl;
         }
-#ifdef SHOW_IMG
-        imshow("src",src);
-        cv::waitKey(1);
-#endif
         auto te = chrono::steady_clock::now();
         double cost = chrono::duration<double, milli>(te - ts).count();
         std::cout << " == ang_P " << send_data.pitch
                   << " == ang_Y " << send_data.yaw
                   << " == Dis " << send_data.dis
+                  << " == Bs " <<stm.bulletSpeed
                   << std::endl;
         std::cout << "cost " << cost << " ms" << std::endl;
+        last_mode = mode;
+        double period = chrono::duration<double> (t1-last_time).count();
+        double fps = 1.0 / period;
+        last_time = t1;
+        std::cout<<"================ FPS: "<<fps<<std::endl;
+//        putText(src, to_string(fps),Point2f(0,30),FONT_HERSHEY_COMPLEX_SMALL,1, Scalar(255,0,0));
+//        imshow("src",src);
+//        cv::waitKey(1);
     }
 }

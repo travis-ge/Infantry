@@ -1,5 +1,6 @@
 #include "camera_api.h"
-
+#include "serial_port.h"
+extern SerialPort port;
 GX_STATUS Config() {
     GX_STATUS status = GX_STATUS_SUCCESS;
     //在起始位置调用GXInitLib()进行初始化，申请资源
