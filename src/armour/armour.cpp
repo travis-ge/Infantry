@@ -41,9 +41,9 @@ Armour::Armour() {
     fs1["armour"]["light_contour_min"] >> light_contour_min;
     fs1.release();
 //    numClass = make_shared<Classifier>();
-    numClass = make_shared<NumClassifier>(PROJECT_DIR"/config/fc.onnx",PROJECT_DIR"/config/label.txt",0.6);
+    numClass = make_shared<NumClassifier>(PROJECT_DIR"/config/fc.onnx",PROJECT_DIR"/config/label.txt",0.7);
     angleSolver = make_shared<AngleSolver>();
-    ekf = make_shared<EKFPredictor>();
+    EKFp = make_shared<EKFPredictor>();
     energy = make_shared<Energy>();
 }
 
@@ -146,7 +146,8 @@ void Armour::imgPretreatment(const cv::Mat &src, cv::Mat &dst, int team) {
         subtract(src_split_[0], src_split_[1], src_separation);
         threshold(src_separation, src_separation, b_spilt_threshold, 255, cv::THRESH_BINARY);
         threshold(src_gray, src_gray, b_gray_threshold, 255, cv::THRESH_BINARY);
-        dilate(src_separation,src_separation,element7_9);
+        dilate(src_separation, src_separation,element7_9);
+
         dst = src_separation & src_gray;
     }
     if (debug) {
@@ -155,6 +156,7 @@ void Armour::imgPretreatment(const cv::Mat &src, cv::Mat &dst, int team) {
         imshow("sep", src_separation);
         cv::waitKey(1);
     }
+
 }
 
 /**
@@ -207,7 +209,6 @@ bool Armour::armourDetector(const Mat &src) {
             v_lightBar.push_back(lightBar);
         }
     }
-
     if (v_lightBar.size() < 2) {
         return false;
     }
@@ -225,7 +226,7 @@ bool Armour::armourDetector(const Mat &src) {
             double X_diff = abs(v_lightBar[i].center.x - v_lightBar[j].center.x);//横坐标差值
 
             if (Y_diff < 0.8 * height_max && X_diff < height_max * 5 &&
-                (angle_diff < 5 || 180 - angle_diff < 5) &&
+                (angle_diff < 5 || 180 - angle_diff < 3) &&
                 /*lightBar_dis / v_lightBar[i].size.height >0.5 &&*/
                 height_diff / height_max < 0.3 &&
                 width_diff / width_sum < 0.4 &&
@@ -241,7 +242,7 @@ bool Armour::armourDetector(const Mat &src) {
                     tmp_armour.v_Pts_L = cv::Point2f(v_lightBar[j].center);
                     tmp_armour.v_Pts_R = cv::Point2f(v_lightBar[i].center);
                 }
-                if (180 - angle_diff < 5)
+                if (180 - angle_diff < 3)
                     tmp_armour.armour_rect.angle += 90;
                 int nL = (v_lightBar[i].size.height + v_lightBar[j].size.height) / 2; //装甲的高度
                 int nW = sqrt((v_lightBar[i].center.x - v_lightBar[j].center.x) *
@@ -422,10 +423,19 @@ bool Armour::armourSort(void) {
             warpPerspective(src, src1, transform, Size(width, height));
 //        imshow("warp after", src1);
         int num = -1;
+        if(port.receive[1] == 'h'){
+            num = numClass->predict(src1);
+            if_use_id = true;
+        }
+        else{
+            num = 3;
+            if_use_id = false;
+        }
+
         ///recognize number
 //        num = numClass->numPredict(src1);
-        num = numClass->predict(src1);
-        if (num > 7) {
+//        num = numClass->predict(src1);
+        if (num > 7 || num == 2) {
             i = tmp_armour_vec.erase(i);
             continue;
         } else {
@@ -447,10 +457,17 @@ int tg_num = 0;
 int frame_cnt = 0;
 chrono::time_point<chrono::steady_clock> last_t;
 #define USE_PRE
-//#define SHOW_IMG
+#define SHOW_IMG
 
 void Armour::armour_tracking() {
-    last_t = chrono::steady_clock::now();
+//    last_t = chrono::steadySSSSS
+    auto this_t = chrono::steady_clock::now();
+    double period = chrono::duration<double>(this_t-last_t).count();
+    if(period > 1){
+        cout<<"real frame " <<frame_cnt<<std::endl;
+        last_t = this_t;
+        frame_cnt = 0;
+    }
     /**creat searching ROI **/
     int tg_num = 0;
     char cmd = 0x30;
@@ -585,7 +602,7 @@ void Armour::armour_tracking() {
 //            std::cout<<"============================= abs "<<world_point<<std::endl;
 #ifdef USE_PRE
         Ptz_infor use_stm;
-        if (!ekf->is_inited) {
+        if (!EKFp->is_inited) {
             current_yaw = stm.yaw;
         }
         use_stm.yaw = stm.yaw - current_yaw;
@@ -597,11 +614,11 @@ void Armour::armour_tracking() {
         Armour_case a;
         a.world_point = target_armour.world_point;
         a.id = target_armour.id;
-        auto pre_abs = ekf->predict(a, time_stamp);
+        auto pre_abs = EKFp->predict(a, time_stamp);
         auto pre_cam = angleSolver->abs2cam(pre_abs, use_stm);
         auto pre_pixel = cam2pixel(pre_cam);
         if(fabs(pre_pixel.x - pixelPoint.x) > 0.5*src.cols || fabs(pre_pixel.y-pixelPoint.y) > 0.5*src.rows){
-            ekf->is_inited = false;
+            EKFp->is_inited = false;
             angleSolver->getAngle(camPoint, send_data.pitch, send_data.yaw, send_data.dis);
         }else
             angleSolver->getAngle(pre_cam, send_data.pitch, send_data.yaw, send_data.dis);
@@ -627,8 +644,8 @@ void Armour::armour_tracking() {
 //            putText(src, "abs_pitch "+to_string(abs_pitch),Point2f(400,70),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
         putText(src,"world point "+ to_string(world_point.x)+" "+ to_string(world_point.y)+" "+ to_string(world_point.z),Point2f(0,90),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0));
 #ifdef USE_PRE
-        circle(src,pixelPoint,20,Scalar(0,0,255),-1);
-        circle(src,pre_pixel,20,Scalar(0,255,0),-1);
+        circle(src,pixelPoint,2,Scalar(0,0,255),-1);
+        circle(src,pre_pixel,2,Scalar(0,255,0),-1);
 #endif
 
 #endif
@@ -644,11 +661,6 @@ void Armour::armour_tracking() {
         }
     }
     auto t2 = chrono::steady_clock::now();
-    if ((int) chrono::duration<double>(t2 - last_t).count() == 1) {
-//        cout << " real frame " << frame_cnt << std::endl;
-        frame_cnt = 0;
-        last_t = t2;
-    }
     *(signed char *) &port.buff_w_[0] = int16_t(10000 * (send_data.pitch));
     *(signed char *) &port.buff_w_[1] = int16_t((10000 * (send_data.pitch))) >> 8;
     *(signed char *) &port.buff_w_[2] = int16_t(10000 * (send_data.yaw));
@@ -769,7 +781,7 @@ void Armour::armour_tracking() {
                     armourROI = Rect(0, 0, 0, 0);
                 }
                 cv::Mat dst;
-                if (roi_ready) {
+                if (roi_ready ) {
                     roi = src(armourROI);
                     imgPretreatment(roi, dst, find_color_armour);
                 } else
@@ -781,6 +793,7 @@ void Armour::armour_tracking() {
                 armour_tracking();
                 std::cout << "<< ===== AUTO AIM RUNNING !!!! ===== >>" << std::endl;
                 std::cout << "<< ===== ARMOUR ROI STATUS " << (int) roi_ready << std::endl;
+                std::cout << "<< ===== ARMOUR ID STATUS " << (int) if_use_id<< std::endl;
         }
         auto te = chrono::steady_clock::now();
         double cost = chrono::duration<double, milli>(te - ts).count();
@@ -795,7 +808,7 @@ void Armour::armour_tracking() {
         double fps = 1.0 / period;
         last_time = t1;
         std::cout<<"================ FPS: "<<fps<<std::endl;
-//        putText(src, to_string(fps),Point2f(0,30),FONT_HERSHEY_COMPLEX_SMALL,1, Scalar(255,0,0));
+        putText(src, to_string(fps),Point2f(0,30),FONT_HERSHEY_COMPLEX_SMALL,1, Scalar(255,0,0));
 //        imshow("src",src);
 //        cv::waitKey(1);
     }

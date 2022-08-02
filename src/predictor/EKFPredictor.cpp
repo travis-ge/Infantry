@@ -2,26 +2,33 @@
 // Created by quanyi on 22-7-5.
 //
 #include "EKFPredictor.h"
+#include "serial_port.h"
 #include "base.h"
 
 extern Ptz_infor stm;
+extern SerialPort port;
+
 cv::Point3f EKFPredictor::predict(Armour_case &armour, double t) {
-    if(armour_seq.size() > 10)
-        armour_seq.pop_front();
-    armour_seq.push_back(armour);
+    anti_judge(armour,t);
+    std::cout<<"< ==================== ANTI STATUS: "<< is_anti<<std::endl;
+    if(port.receive[1] == 'c')
+        is_anti = true;
+    else
+        is_anti = false;
     double shoot_delay = 0.1;
     double dis = sqrt(pow(armour.world_point.x,2)+ pow(armour.world_point.y,2)+ pow(armour.world_point.z,2));
 
-    if(fabs(dis - last_dis) > 0.15 || (t - last_time) > 1){
+    if(fabs(dis - last_dis) > 0.15 || (t - last_time) > 1 || armour.id != last_armour.id){
         is_inited = false;
         std::cout<<"target changed ,ekf re init !!!!! "<<"dis diff "<<fabs(dis-last_dis)<<
         " t diff "<<t - last_time<<std::endl;
     }
-    std::cout<<"id "<<armour.id << " last id "<<(armour_seq.end()-1)->id<<std::endl;
+    std::cout<<"id "<<armour.id << " last id "<<last_armour.id<<std::endl;
     std::cout<<"dis error "<<fabs(dis-last_dis)<<std::endl;
     if(!is_inited){
         last_time = t;
         last_dis = dis;
+        last_armour = armour;
         is_inited = true;
         Eigen::Matrix<double, 5, 1> Xr;
         Xr << armour.world_point.x, 0, armour.world_point.y, 0, armour.world_point.z;
@@ -31,6 +38,7 @@ cv::Point3f EKFPredictor::predict(Armour_case &armour, double t) {
     last_dis = dis;
     double delta_t = t - last_time;
     last_time = t;
+    last_armour = armour;
     Predict predictfunc;
     Measure measure;
 
@@ -60,4 +68,31 @@ cv::Point3f EKFPredictor::predict(Armour_case &armour, double t) {
 //        return armour.world_point;
 //    }
     return cv::Point3f (p_pw(0,0),p_pw(1,0),p_pw(2,0));
+}
+
+void EKFPredictor::anti_judge(Armour_case &armour, double t) {
+    if(t - last_time > 0.5){
+        is_anti = false;
+        anti_judge_cnt = 0;
+    }
+    double current_yaw = atan2(armour.world_point.x, armour.world_point.z);
+    double last_yaw = atan2(last_armour.world_point.x, last_armour.world_point.z);
+    double yaw_diff = shortest_angle_distance(last_yaw, current_yaw);
+    std::cout<<"yaw diff "<<yaw_diff<<std::endl;
+    if(fabs(yaw_diff) > yaw_diff_max){
+        anti_judge_cnt ++ ;
+        if(anti_judge_cnt>1 && (std::signbit(yaw_diff) == std::signbit(last_yaw_diff))){
+            is_anti = true;
+            anti_lose_cnt = 0;
+        }
+        last_yaw_diff = yaw_diff;
+    }else{
+        if(std::signbit(yaw_diff) != std::signbit(last_yaw_diff)){
+            anti_lose_cnt++;
+        }
+        if(anti_lose_cnt > 10){
+            is_anti = false;
+            anti_judge_cnt = 0;
+        }
+    }
 }

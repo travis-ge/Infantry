@@ -16,6 +16,36 @@ NumClassifier::NumClassifier(const std::string &model_path, const std::string &l
         class_name_.push_back(line[0]);
     }
 }
+
+void NumClassifier::gammaTransform(cv::Mat &srcImage, cv::Mat &resultImage, float kFactor) {
+    unsigned char LUT[256];
+    for (int i = 0; i < 256; i++)
+    {
+        float f = (i + 0.5f) / 255;
+        f = (float)(pow(f, kFactor));
+        LUT[i] = cv::saturate_cast<uchar>(f * 255.0f - 0.5f);
+    }
+    if (srcImage.channels() == 1)
+    {
+        cv::MatIterator_<uchar> iterator = resultImage.begin<uchar>();
+        cv::MatIterator_<uchar> iteratorEnd = resultImage.end<uchar>();
+        for (; iterator != iteratorEnd; iterator++)
+        {
+            *iterator = LUT[(*iterator)];
+        }
+    }
+    else
+    {
+        cv::MatIterator_<cv::Vec3b> iterator = resultImage.begin<cv::Vec3b>();
+        cv::MatIterator_<cv::Vec3b> iteratorEnd = resultImage.end<cv::Vec3b>();
+        for (; iterator != iteratorEnd; iterator++)
+        {
+            (*iterator)[0] = LUT[((*iterator)[0])];//b
+            (*iterator)[1] = LUT[((*iterator)[1])];//g
+            (*iterator)[2] = LUT[((*iterator)[2])];//r
+        }
+    }
+}
 /**
  * 7 qianshaozhan  ? sentry
  * 0 jidi xiaozhuangjia
@@ -24,10 +54,20 @@ NumClassifier::NumClassifier(const std::string &model_path, const std::string &l
  * @return
  */
 int NumClassifier::predict(cv::Mat &src) {
+//    cv::imshow("11",src);
+    cv::pyrUp(src,src,cv::Size(src.cols *2,src.rows*2));
+//    cv::imshow("22",src);
     cv::cvtColor(src,src,CV_BGR2GRAY);
+    cv::Mat element3  = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(3,3));
 //    cv::imshow("sssss",src);
-    cv::threshold(src,src,0,255,CV_THRESH_OTSU);
+    gammaTransform(src,src,0.6);
 //    cv::imshow("num",src);
+    cv::threshold(src,src,0,255,CV_THRESH_OTSU);
+    cv::erode(src,src,element3);
+    cv::dilate(src,src,element3);
+    cv::dilate(src,src,element3);
+    cv::erode(src,src,element3);
+    cv::imshow("thre",src);
 //    cv::waitKey(1);
     src = src / 255.0;
     cv::Mat blob;

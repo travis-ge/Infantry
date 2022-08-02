@@ -4,9 +4,9 @@
 armour:
   debug: 0
   red_spilt_threshold: 95
-  red_gray_threshold: 120
+  red_gray_threshold: 115
   red_green_threshold: 160
-  blue_spilt_threshold: 80
+  blue_spilt_threshold: 95
   blue_gray_threshold: 125
   blue_green_threshold: 60
   light_contour_min: 5
@@ -43,4 +43,14 @@ ekf:
   R11: 1
   R22: 800
 
-
+anti_ekf:
+  # predict
+  Q00: 0.01
+  Q11: 100
+  Q22: 0.01
+  Q33: 100
+  Q44: 0.01
+  # measure
+  R00: 1
+  R11: 1
+  R22: 800

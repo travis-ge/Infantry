@@ -77,7 +77,7 @@ private:
     uint8_t roi_ready = 0;
     int tracking_cnt = 0;
     cv::Rect armourROI = {0,0,0,0};
-
+    bool if_use_id = true;
     int b_spilt_threshold;
     int b_gray_threshold;
     int b_green_threshold;
@@ -86,7 +86,7 @@ private:
 //    shared_ptr<Classifier> numClass;
     shared_ptr<NumClassifier> numClass;
     shared_ptr<AngleSolver> angleSolver;
-    shared_ptr<EKFPredictor> ekf;
+    shared_ptr<EKFPredictor> EKFp;
     shared_ptr<Energy> energy;
     const Mat element3 = getStructuringElement(MORPH_RECT,Size(3,3));
     const Mat element3_5 = getStructuringElement(MORPH_RECT,Size(3,5));

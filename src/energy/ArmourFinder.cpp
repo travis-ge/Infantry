@@ -33,6 +33,7 @@ ArmourFinder::ArmourFinder() {
 
     YAML::Node config = YAML::LoadFile(pf_path);
     pf_param_loader.initParam(config, "buff");
+    pf_angle_param_loader.initParam(config, "angle");
 }
 ArmourFinder::~ArmourFinder() {
 
@@ -83,31 +84,12 @@ int ArmourFinder::searchArmour(Mat &src, long long timestamp, double p_time, con
         return 2;
     }
 
-//    pre_angle = predictAngle(mode);
+    pre_angle = predictAngle(mode);
 //    pre_angle = predictAngle(1);
 //    pre_angle = predictAngle(2);
-    pre_angle = predictAngle(mode);
+//    pre_angle = predictAngle(3);
 //      pre_angle = predictAngle(4);
 
-//    pre_angle = (predictAngle(2)+ predictAngle(3))/2;
-
-
-//    double pre_angle_2 = predictAngle(2);
-//    double pre_angle_3 = predictAngle(3);
-//
-////    pre_angle = (pre_angle_2+pre_angle_3)/2;
-////    pre_angle = pre_angle_2;
-//
-////    pre_angle = pre_angle_3;
-//
-//    Point2f point_2, point_3;
-//    angle2points_PIX(point_2, pre_angle_2);
-//    circle(src,point_2,6,Scalar(255,0,0),-1);
-//    angle2points_PIX(point_3, pre_angle_3);
-//    circle(src,point_3,6,Scalar(0,0,255),-1);
-
-
-//    std::cout<<"debug infor fan dir is "<<rotation_direction<<std::endl;
 
     //像素层面计算坐标
     fan_.pre_point = pre_point;
@@ -138,6 +120,7 @@ void ArmourFinder::taskInit() {
     predict_time = 0;
 
     pf.initParam(pf_param_loader);
+    pf_angle_param_loader.initParam(pf_angle_param_loader);
     solveFan.is_sine_found = false;
     solveFan.is_phi_start = false;
     solveFan.is_phi_found = false;
@@ -591,7 +574,7 @@ void ArmourFinder::getInfo() {
     float abs_angle = fabs(polar_angle_diff);
 
     ///判断当前需要拟合的参数
-    if(!solveFan.is_sine_found){stride = 1;}
+    if(!solveFan.is_sine_found){stride = 3;}
     else{stride=1;}
 
     if (abs_angle > 0.9 && abs_angle < 6.0) {
@@ -621,58 +604,67 @@ void ArmourFinder::getInfo() {
 
             double span = double(v_angle[idx].x - v_angle[idx_before].x);  //s
 //            double span = double(v_angle[idx].x - v_angle[idx_before].x);  //s
-            //时间间隔限制
-            if(span >0) {
+
+        //时间间隔限制
+        if(span >0) {
 //                cout << "---------------------------------------------\n";
 //                cout << "----------------------span-------------------\n" << span/1000 << endl;
 //                cout << "---------------------------------------------\n";
-                float cur_spd =
-                        fmod(abs(angleDifference) + CV_2PI, CV_2PI)*1000 / span;
+            float cur_spd =
+                    fmod(abs(angleDifference) + CV_2PI, CV_2PI)*1000 / span;
 //                fmod(abs(angleDifference) + CV_2PI, CV_2PI) *1000/ span;
-
+            float cur_spd_2 = recursive_mean(cur_spd, 5);
+            float cur_spd_3 = cur_spd;
 //                float cur_spd_2 = cur_spd;
-                //不要小瞧沈航人.jpg （沈航RMer确实很强，这句话是智能车竞赛一个沈航老师有趣的梗）
-                auto is_ready = pf.is_ready;
-                Eigen::VectorXd measure(1);
-                measure << cur_spd;
-                pf.update(measure);
-                if (is_ready) {
-                    auto predict = pf.predict();
-                    cur_spd = predict[0];
-                }
-                fit_speed.emplace_back(time_stamp, cur_spd);
-                if (fit_speed.size() > sample_size) {
-                    fit_speed.erase(fit_speed.begin());
+            //不要小瞧沈航人.jpg （沈航RMer确实很强，这句话是智能车竞赛一个沈航老师有趣的梗）
+            auto is_ready = pf.is_ready;
+            Eigen::VectorXd measure(1);
+            measure << cur_spd;
+            pf.update(measure);
+            if (is_ready) {
+                auto predict = pf.predict();
+                cur_spd = predict[0];
+            }
+
+            float cur_spd_4 = (cur_spd_2+cur_spd)/2;
+
+            fit_speed.emplace_back(time_stamp, cur_spd);
+//            fit_speed.emplace_back(time_stamp, cur_spd_4);
+            if (fit_speed.size() > sample_size) {
+                fit_speed.erase(fit_speed.begin());
 //                    Y_write<<"spd"<<cur_spd;
 //                    X_write<<"time_stamp"<<int(time_stamp);
-                }
+            }
 
-                if(fit_speed.size()!=0){
-                    int idx = fit_speed.size() - 1;
-                    int idx_before = idx - 1;
-                    double span_acc = double(fit_speed[idx].x - fit_speed[idx_before].x)/1000;
-                    float det = fit_speed[idx].y - fit_speed[idx_before].y;
-                    float a = det/span_acc;
-                    fit_acc.emplace_back(time_stamp, det/span_acc);
-                    if(fit_acc.size()>sample_size){
-                        fit_acc.erase(fit_acc.begin());
-                    }
+            if(fit_speed.size()!=0){
+                int idx = fit_speed.size() - 1;
+                int idx_before = idx - 1;
+                double span_acc = double(fit_speed[idx].x - fit_speed[idx_before].x)/1000;
+                float det = fit_speed[idx].y - fit_speed[idx_before].y;
+                float a = det/span_acc;
+                fit_acc.emplace_back(time_stamp, det/span_acc);
+                if(fit_acc.size()>sample_size){
+                    fit_acc.erase(fit_acc.begin());
                 }
+            }
 
 
 #ifdef PLOT_SINE
 //                ////记录下每帧
 //                cv::circle(plot_all, Point2f(fmod(plot_cnt, cols), rows - (cur_spd / 30 * rows)), 2, Scalar(0, 255, 0));
-                cv::circle(plot_all, Point2f(fmod(plot_cnt, cols), rows - (cur_spd / 5 * rows)), 2, Scalar(0, 255, 0));
-                cv::circle(plot_all, Point2f(fmod(plot_cnt, cols), rows - (target_polar_angle / 30 * rows)), 2,
-                           Scalar(0, 90, 255));
-                plot_cnt++;
-                if (fmod(plot_cnt, cols) == 0) { plot_all = Mat::zeros(rows, cols, CV_8UC3); }
-                imshow("plot_1", plot_all);
-                waitKey(1);
+            cv::circle(plot_all, Point2f(fmod(plot_cnt, cols), rows - (cur_spd / 3 * rows)), 2, Scalar(0, 255, 0));
+//            cv::circle(plot_all, Point2f(fmod(plot_cnt, cols), rows - (cur_spd_2 / 3 * rows)), 2, Scalar(0, 0, 255));
+//            cv::circle(plot_all, Point2f(fmod(plot_cnt, cols), rows - (cur_spd_3 / 3 * rows)), 2, Scalar(255, 0, 0));
+//            cv::circle(plot_all, Point2f(fmod(plot_cnt, cols), rows - (cur_spd_4 / 3 * rows)), 2, Scalar(255, 0, 255));
+//            cv::circle(plot_all, Point2f(fmod(plot_cnt, cols), rows - (target_polar_angle / 30 * rows)), 2,
+//                       Scalar(0, 90, 255));
+            plot_cnt++;
+            if (fmod(plot_cnt, cols) == 0) { plot_all = Mat::zeros(rows, cols, CV_8UC3); }
+            imshow("plot_1", plot_all);
+            waitKey(1);
 #endif
 
-            }
+        }
     }
 
     //更新
@@ -707,15 +699,15 @@ void ArmourFinder::getDirection() {
 //    cout<<last_rotation_direction<<endl;
 //    cout<<"-----------------"<<endl;
 
-    if (v_angle.size() >= 20) {
+    if (v_angle.size() >= 22) {
         int stop = 0, clockwise = 0, counter_clockwise = 0;
         for (size_t i = 0; i < 15; i++) {
 //            float angle_diff = tool::rad2deg(v_angle[i + 15].y) - tool::rad2deg(v_angle[i].y);
 
-            float angle_1 = tool::rad2deg(v_angle[i + 3].y);
+            float angle_1 = tool::rad2deg(v_angle[i + 5].y);
             float angle_2 = tool::rad2deg(v_angle[i].y);
             float angle_diff = angle_1 - angle_2;
-            if (fabs(angle_diff) < 1.5)
+            if (fabs(angle_diff) < 1)
                 stop++;
             else if (angle_diff > 0)
                 counter_clockwise++;
@@ -753,7 +745,18 @@ float ArmourFinder::predictAngle(uint8_t mode) {
         return  rotation_direction * (solveFan.pos_fun(predict_time+time_passed) - solveFan.pos_fun(time_passed));
     }
     else if(mode == 3){
-        return rotation_direction * getAcc();
+
+        float angle = getAcc();
+        angle = recursive_mean(angle,3);
+//        Eigen::VectorXd measure(1);
+//        measure << angle;
+//        pf_angle.update(measure);
+//        if (pf_angle.is_ready) {
+//            auto predict = pf_angle.predict();
+//            angle = predict[0];
+//        }
+        cout<<"-----angle----"<<angle<<endl;
+        return rotation_direction * angle;
     }
     else if(mode == 4){
         //拟合
@@ -772,36 +775,38 @@ float ArmourFinder::getAcc(){
 
     if(fit_acc.size()<10){return 0;}
 
-//    int dura = 50;
-//    int dura = 100;
     int dura = 50;
     double sum_acc = 0;
     double sum_spd = 0;
-
     int start_idx, end_idx;
+    int num_spd ;
+//    int num_acc = num_spd= 0;
 
     getTimeDura(fit_speed, dura, start_idx, end_idx, last_idx_acc);
     for(int i=start_idx; i<end_idx; i++){
         sum_acc += fit_acc[i].y;
+//        num_acc++;
     }
-    int num_spd ;
-    int num_acc = num_spd= end_idx - start_idx;
 
-//    getTimeDura(fit_speed, dura, start_idx, end_idx, last_idx_spd);
+    getTimeDura(fit_speed, dura, start_idx, end_idx, last_idx_spd);
     for(int i=start_idx; i<end_idx; i++){
         sum_spd += fit_speed[i].y;
+//        num_spd++;
     }
+    int num_acc = num_spd= end_idx - start_idx;
+
 //    int num_spd = end_idx - start_idx;
 
 //    int time =  fit_acc[sz-1].x - start_idx;
-    cout<<"-------------------acc-------------------"<<sum_acc/num_acc<<endl;
-    cout<<"-------------------spd-------------------"<<sum_spd/num_spd<<endl;
 
     float mean_acc = sum_acc/num_acc;
     float mean_spd = sum_spd/num_spd;
 
-    float pass_angle = mean_spd *predict_time + mean_acc*predict_time*predict_time/2;
-    return pass_angle;
+    cout<<"-------------------acc-------------------"<<mean_acc<<"----num_acc----"<<num_acc<<endl;
+    cout<<"-------------------spd-------------------"<<mean_spd<<"----num_spd----"<<num_spd<<endl;
+
+    return mean_spd *predict_time + mean_acc*predict_time*predict_time/2;
+
 }
 
 void ArmourFinder::angle2points_PIX() {
@@ -838,3 +843,20 @@ void ArmourFinder::getTimeDura(vector<time_angle>&data,  int dura, int & start_i
     }
     last_idx = start_idx;
 }
+
+float ArmourFinder::recursive_mean(float xn,int size){
+    static int index = 0;  static float last_mean = 0.0f;  float mean = 0.0f;
+    if(index-1){
+        index++;
+        mean = last_mean+(xn-last_mean)/index;
+    }else{
+        mean = last_mean+(xn-last_mean)/size;
+        index     = 0;
+        last_mean = 0.0f;
+    }
+    last_mean = mean;
+    return mean;
+}
+
+
+

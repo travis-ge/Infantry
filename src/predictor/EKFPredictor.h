@@ -55,10 +55,29 @@ struct Measure {
 class EKFPredictor {
 private:
     AdaptiveEKF<5, 3> ekf;  // 创建ekf
+    AdaptiveEKF<5, 3> anti_ekf;
     std::deque<Armour_case> armour_seq;
+    Armour_case last_armour;
     double last_time;
     double last_dis = 0;
+    /// anti judge
+    void anti_judge(Armour_case & armour, double t);
     bool is_anti = false;
+    float yaw_diff_max = 0.2;
+    int anti_judge_cnt = 0;
+    int anti_lose_cnt = 0;
+    double last_yaw_diff = 0;
+
+    static inline double normalize_angle(double angle){
+        const double result = fmod(angle + M_PI, 2.0 * M_PI);
+        if(result <= 0.0)
+            return result  + M_PI;
+        return result - M_PI;
+    }
+
+    static inline double shortest_angle_distance(double from, double to){
+        return normalize_angle(to - from);
+    }
 
 public:
     bool is_inited = false;
@@ -73,8 +92,17 @@ public:
         fin["ekf"]["R00"] >> ekf.R(0, 0);
         fin["ekf"]["R11"] >> ekf.R(1, 1);
         fin["ekf"]["R22"] >> ekf.R(2, 2);
-        std::cout<<ekf.Q<<std::endl;
-        std::cout<<ekf.R<<std::endl;
+        ///
+        fin["anti_ekf"]["Q00"] >> anti_ekf.Q(0, 0);
+        fin["anti_ekf"]["Q11"] >> anti_ekf.Q(1, 1);
+        fin["anti_ekf"]["Q22"] >> anti_ekf.Q(2, 2);
+        fin["anti_ekf"]["Q33"] >> anti_ekf.Q(3, 3);
+        fin["anti_ekf"]["Q44"] >> anti_ekf.Q(4, 4);
+        // 观测过程协方差
+        fin["anti_ekf"]["R00"] >> anti_ekf.R(0, 0);
+        fin["anti_ekf"]["R11"] >> anti_ekf.R(1, 1);
+        fin["anti_ekf"]["R22"] >> anti_ekf.R(2, 2);
+
 
     }
 

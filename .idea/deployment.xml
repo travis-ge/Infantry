@@ -13,7 +13,7 @@
           </excludedPaths>
         </serverdata>
       </paths>
-      <paths name="infantry_4 (d857de5b-62a7-413b-abf8-1c58a2e8f841)">
+      <paths name="infantry_4 (54392b82-ee92-445b-be1d-fa0b92bd68b5)">
         <serverdata>
           <mappings>
             <mapping deploy="/workspace/infantry" local="$PROJECT_DIR$" />
@@ -23,7 +23,7 @@
           </excludedPaths>
         </serverdata>
       </paths>
-      <paths name="infantry_5 (54392b82-ee92-445b-be1d-fa0b92bd68b5)">
+      <paths name="infantry_5 (d857de5b-62a7-413b-abf8-1c58a2e8f841)">
         <serverdata>
           <mappings>
             <mapping deploy="/workspace/infantry" local="$PROJECT_DIR$" />

@@ -80,6 +80,9 @@ private:
     ParticleFilter pf;
     ParticleFilter pf_param_loader;
 
+    ParticleFilter pf_angle;
+    ParticleFilter pf_angle_param_loader;
+
     /////////
 
     ///每帧图像变量都清零一次///
@@ -152,6 +155,11 @@ private:
 
     float getAcc();
 
+    void shiftWindowFilter(vector<time_angle> &data, int &start_idx, int &end_idx);
+
+    void shiftWindowFilter(vector<time_angle> &data, int &start_idx, int &end_idx, int window_size);
+
+    float recursive_mean(float xn, int size);
 };
 
 

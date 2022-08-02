@@ -238,7 +238,6 @@ void Classifier::gammaTransform(cv::Mat &srcImage, cv::Mat &resultImage, float k
         f = (float)(pow(f, kFactor));
         LUT[i] = cv::saturate_cast<uchar>(f * 255.0f - 0.5f);
     }
-
     if (srcImage.channels() == 1)
     {
         cv::MatIterator_<uchar> iterator = resultImage.begin<uchar>();
@@ -250,8 +249,6 @@ void Classifier::gammaTransform(cv::Mat &srcImage, cv::Mat &resultImage, float k
     }
     else
     {
-
-
         cv::MatIterator_<cv::Vec3b> iterator = resultImage.begin<cv::Vec3b>();
         cv::MatIterator_<cv::Vec3b> iteratorEnd = resultImage.end<cv::Vec3b>();
         for (; iterator != iteratorEnd; iterator++)
@@ -261,7 +258,6 @@ void Classifier::gammaTransform(cv::Mat &srcImage, cv::Mat &resultImage, float k
             (*iterator)[2] = LUT[((*iterator)[2])];//r
         }
     }
-
 }
 /**
  *

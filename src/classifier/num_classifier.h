@@ -15,5 +15,6 @@ public:
 private:
     cv::dnn::Net net_;
     std::vector<char> class_name_;
+    void  gammaTransform(cv::Mat& srcImage, cv::Mat& resultImage, float kFactor);
 };
 #endif //ARMOURSHOOT_NUM_CLASSIFIER_H
