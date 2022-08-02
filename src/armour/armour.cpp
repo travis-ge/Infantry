@@ -9,6 +9,7 @@
 extern pair<std::chrono::time_point<std::chrono::steady_clock>, cv::Mat> img_buf;
 extern SerialPort port;
 extern std::mutex mImg_buf;
+extern std::mutex mtx_port;
 extern Ptz_infor stm;
 extern Send send_data;
 extern bool expose_time_reset;
@@ -423,14 +424,8 @@ bool Armour::armourSort(void) {
             warpPerspective(src, src1, transform, Size(width, height));
 //        imshow("warp after", src1);
         int num = -1;
-        if(port.receive[1] == 'h'){
-            num = numClass->predict(src1);
-            if_use_id = true;
-        }
-        else{
-            num = 3;
-            if_use_id = false;
-        }
+        num = 3;
+        if_use_id = false;
 
         ///recognize number
 //        num = numClass->numPredict(src1);
@@ -602,12 +597,14 @@ void Armour::armour_tracking() {
 //            std::cout<<"============================= abs "<<world_point<<std::endl;
 #ifdef USE_PRE
         Ptz_infor use_stm;
+        mtx_port.lock();
         if (!EKFp->is_inited) {
             current_yaw = stm.yaw;
         }
         use_stm.yaw = stm.yaw - current_yaw;
         use_stm.pitch = stm.pitch;
         use_stm.bulletSpeed = stm.bulletSpeed;
+        mtx_port.unlock();
         auto world_point = angleSolver->cam2abs(camPoint, use_stm);
         target_armour.world_point = world_point;
 //            std::cout<<"prepreper" <<target_armour.id<<std::endl;
@@ -638,8 +635,8 @@ void Armour::armour_tracking() {
         putText(src, to_string(target_armour.id),target_armour.armour_rect.boundingRect().tl(),FONT_HERSHEY_COMPLEX_SMALL,1,(255,0,0),1);
         putText(src, "cam_yaw "+to_string(send_data.yaw),Point2f(0,30),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
         putText(src, "cam_pitch "+to_string(send_data.pitch),Point2f(400,30),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
-        putText(src, "ptz_yaw "+to_string(stm.yaw),Point2f(0,50),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
-        putText(src, "ptz_pitch "+to_string(stm.pitch),Point2f(400,50),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
+        putText(src, "ptz_yaw "+to_string(use_stm.yaw),Point2f(0,50),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
+        putText(src, "ptz_pitch "+to_string(use_stm.pitch),Point2f(400,50),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
 //            putText(src, "abs_yaw "+to_string(abs_yaw),Point2f(0,70),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
 //            putText(src, "abs_pitch "+to_string(abs_pitch),Point2f(400,70),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
         putText(src,"world point "+ to_string(world_point.x)+" "+ to_string(world_point.y)+" "+ to_string(world_point.z),Point2f(0,90),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0));
@@ -674,7 +671,7 @@ void Armour::armour_tracking() {
  *
  */
 #define K_SPEED 10000
-
+int camera_offline_cnt = 0;
 [[noreturn]]void Armour::run() {
     if (!readCameraParameters(cameraParam)) {
         for (int i = 0; i < 100; ++i)
@@ -685,6 +682,7 @@ void Armour::armour_tracking() {
     STATE last_mode;
     std::chrono::time_point<std::chrono::steady_clock> last_time;
     while (true) {
+//        std::cout<<"AUTO AIM THREAD RUNNING ... "<<std::endl;
         auto ts = chrono::steady_clock::now();
         std::chrono::time_point<std::chrono::steady_clock> t1;
         if(img_buf.second.empty()){ continue;}
@@ -702,8 +700,11 @@ void Armour::armour_tracking() {
         img_buf.second.release();
         mImg_buf.unlock();
         if (!src.data) {
+            camera_offline_cnt++;
+            std::cout<<"camera offline cnt "<<camera_offline_cnt<<std::endl;
             continue;
         }
+        camera_offline_cnt = 0;
 #ifdef WRITE_IMG
         char key = cv::waitKey(30);
         if (key == 's') {
@@ -718,17 +719,17 @@ void Armour::armour_tracking() {
 #endif
         uint8_t find_color_armour = 2;
         uint8_t find_color_energy = 1;
-        if (port.receive[4] > K_SPEED) {
-            find_color_armour = 2;
+        mtx_port.lock();
+        find_color_armour = stm.energy_color;
+        if(find_color_armour == 2){
+            std::cout<<"shoot red !!!"<<std::endl;
             find_color_energy = 1;
-            std::cout << "our team is blue, shoot red!!" << std::endl;
-        }
-        if (port.receive[4] < K_SPEED) {
-            find_color_armour = 1;
+        }else{
+            std::cout<<"shoot blue !!!"<<std::endl;
             find_color_energy = 2;
-            std::cout << "our team is red, shoot blue!!" << std::endl;
         }
-        STATE mode = getMode(port.receive[1]);
+        STATE mode = getMode(stm.mode);
+        mtx_port.unlock();
         switch (mode) {
             case STATE_BUFF:{
                 std::cout<<"MODE BUFF "<<std::endl;
@@ -737,7 +738,10 @@ void Armour::armour_tracking() {
                 }
                 char cmd = 0x30;
                 int pp = chrono::duration<double,milli> (t1-start_time).count();
-                if(energy->run(src,pp,find_color_energy,port.receive[1],send_data.pitch,send_data.yaw,send_data.dis)){
+                mtx_port.lock();
+                bool finder_status = energy->run(src,pp,find_color_energy,stm.mode,send_data.pitch,send_data.yaw,send_data.dis);
+                mtx_port.unlock();
+                if(finder_status){
                     cmd = 0x31;
                     energy->energy_last_flag = 1;
                     energy->energy_last_send = send_data;

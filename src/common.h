@@ -20,6 +20,7 @@
  * @param pFrame
  */
 void Frame_0_ProcessRGB(GX_FRAME_CALLBACK_PARAM *pFrame);
+void Camera_offline_deal(void *pUserParams);
 extern double current_yaw ;
 enum STATE{
     STATE_AUTOAIM = 1,
@@ -43,17 +44,17 @@ STATE getMode(char infor);
  * note: PC of infantry 4 has moved to infantry 5 (2022.7.30)
  */
 /**==============  3 ================**/
-#define cameraParam PROJECT_DIR"/config/cameraParams_156.xml"
-#define Param PROJECT_DIR"/config/params3.yml"
-#define cameraSN "KE0200120156"
+//#define cameraParam PROJECT_DIR"/config/cameraParams_156.xml"
+//#define Param PROJECT_DIR"/config/params3.yml"
+//#define cameraSN "KE0200120156"
 /**==============  4 ================**/
 //#define cameraParam PROJECT_DIR"/config/cameraParams_061.xml"
 //#define Param PROJECT_DIR"/config/params4.yml"
 //#define cameraSN "KE0200100061"
 /**==============  5 ================**/
-//#define cameraParam PROJECT_DIR"/config/cameraParams_157.xml"
-//#define Param PROJECT_DIR"/config/params5.yml"
-//#define cameraSN "KE0200120157"
+#define cameraParam PROJECT_DIR"/config/cameraParams_157.xml"
+#define Param PROJECT_DIR"/config/params5.yml"
+#define cameraSN "KE0200120157"
 /**==============  6 ================**/
 //#define cameraParam PROJECT_DIR"/config/cameraParams_332.xml"
 //#define Param PROJECT_DIR"/config/params6.yml"

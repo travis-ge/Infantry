@@ -82,6 +82,7 @@ public:
 
     GX_STATUS status;
     GX_DEV_HANDLE hDevice_;
+    GX_EVENT_CALLBACK_HANDLE hCB_;
 private:
     //! device handle
     GX_OPEN_PARAM stOpenParam_;

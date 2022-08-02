@@ -13,7 +13,7 @@ GX_STATUS Config() {
 
     }
     uint32_t nDeviceNum = 0;
-    status = GXUpdateDeviceList(&nDeviceNum, 1000);
+    status = GXUpdateDeviceList(&nDeviceNum, 100);
 
     if (status == GX_STATUS_SUCCESS && nDeviceNum > 0) {
         GX_DEVICE_BASE_INFO *pBaseinfo = new GX_DEVICE_BASE_INFO[nDeviceNum];

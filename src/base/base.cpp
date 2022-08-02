@@ -9,7 +9,7 @@
 using namespace cv;
 extern SerialPort port;
 extern Ptz_infor stm;
-
+extern std::mutex mtx_port;
 AngleSolver::AngleSolver() {
     FileStorage fs(Param, cv::FileStorage::READ);
     fs["base"]["simple_pitch_diff"] >> simple_pitch_diff;
@@ -111,8 +111,11 @@ void AngleSolver::getAngle(cv::Point3f cam_, double &pitch, double &yaw, double 
     pitch = atan(gun_.y / sqrt(gun_.x * gun_.x + gun_.z * gun_.z));//more big more down
     yaw = atan(gun_.x / gun_.z); //more big more right
     Dis = sqrt(gun_.x * gun_.x + gun_.z * gun_.z +gun_.y*gun_.y);
-
+    mtx_port.lock();
     double ptz_pitch = stm.pitch;
+    double d_speed = stm.bulletSpeed;
+    char mode = stm.mode;
+    mtx_port.unlock();
     //std::cout<<"ppppppppppppppppppppppppp "<<ptz_pitch<<std::endl;
     abs_pitch = -1 * pitch - ptz_pitch;
     //abs_pitch = pitch + ptz_pitch;
@@ -120,15 +123,14 @@ void AngleSolver::getAngle(cv::Point3f cam_, double &pitch, double &yaw, double 
     if (if_fix) {
         //abs_pitch = -abs_pitch;
         double angle_fix = 0.5 *
-                           (asin((9.8 * Dis * pow(cos(abs_pitch), 2)) / pow(stm.bulletSpeed, 2) - sin(abs_pitch)) +
+                           (asin((9.8 * Dis * pow(cos(abs_pitch), 2)) / pow(d_speed, 2) - sin(abs_pitch)) +
                             abs_pitch);
 //        std::cout << "angle fix " << angle_fix << std::endl;
         abs_pitch += angle_fix;
     }
     std::cout<<"ssssssss"<<std::endl;
     pitch = -abs_pitch - ptz_pitch;
-
-    if (port.receive[1] == 'b' || port.receive[1] == 'a' || stm.bulletSpeed > 25) {
+    if (mode == 'b' || mode == 'a' || d_speed > 25) {
         std::cout << "buff add666" << std::endl;
         pitch += buff_pitch_diff;//0.01
         yaw += buff_yaw_diff;//0.001

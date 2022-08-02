@@ -383,11 +383,9 @@ int SerialPort::ReceiveBuff(char *src_buff, char *dst_buff)
             if (ISO14443ACheckCRCA(src_buff, (unsigned short)(src_buff[2] + HEAD_LEN))){
                 //cout<<"receive success"<<endl;
                 //cout << (int8_t *)src_buff <<endl;
-                mtx_port.lock();
                 for (int i = 0; i < DATA_LEN; i++) {
                     dst_buff[i] = src_buff[i];
                 }
-                mtx_port.unlock();
                 int16_t buff[4];
 
                 buff[0] = ((uint16_t)dst_buff[4]<<8)|uint8_t (dst_buff[5]);
@@ -417,15 +415,20 @@ int SerialPort::ReceiveBuff(char *src_buff, char *dst_buff)
 //                    <<", pitch_w: "<<pitch_w  //抬头负，低头正
 //                    <<", yaw_w: "<<yaw_w
 //                    <<endl;  //顺时针负，逆时针正
+                mtx_port.lock();
+                stm.mode = receive[1];
                 stm.pitch = receive[2];
                 stm.yaw = receive[3];
                 stm.yaw_w = receive[6];
                 stm.pitch_w = receive[5];
                 if(receive[4] > 10000.0){
                     stm.bulletSpeed = (receive[4]-10000.0)/100.0;
+                    stm.energy_color = 2;
                 }else{
                     stm.bulletSpeed = receive[4]/100.0;
+                    stm.energy_color = 1;
                 }
+                mtx_port.unlock();
                 return 1;
             }else{
                 for (int i = 0; i < DATA_LEN; i++) {

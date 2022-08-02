@@ -17,6 +17,8 @@ struct Ptz_infor {
     double bulletSpeed;
     double pitch_w;
     double yaw_w;
+    char mode;
+    int energy_color = 1; //red 1 blue 2
 };
 
 
