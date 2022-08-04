@@ -214,7 +214,7 @@ void ArmourFinder::binROI(const Mat &src, Mat &dst, const int team) {
     cv::cvtColor(src, src_gray, CV_BGR2GRAY);
 
     //src_bin
-    threshold(src_gray, src_bin, 0, 255, CV_THRESH_OTSU);
+//    threshold(src_gray, src_bin, 0, 255, CV_THRESH_OTSU);
 
     if (team == 2) {//red
         subtract(src_split_[2], src_split_[0], src_separation);
@@ -238,11 +238,12 @@ void ArmourFinder::binROI(const Mat &src, Mat &dst, const int team) {
         subtract(src_split_[0], src_split_[1], src_green);
         threshold(src_separation, src_separation, b_spilt_threshold, 255, cv::THRESH_BINARY);
         threshold(src_gray, src_gray, b_gray_threshold, 255, cv::THRESH_BINARY);
-        threshold(src_green,src_green,r_green_threshold,255,cv::THRESH_BINARY);
+        threshold(src_green,src_green,b_green_threshold,255,cv::THRESH_BINARY);
 
         dilate(src_separation, src_separation, element5);
         dilate(src_green,src_green, element5);
-        dilate(src_green,src_green, element7);
+        dilate(src_gray,src_gray, element5);
+//        dilate(src_green,src_green, element7);
         dst = src_separation & src_gray & src_green;
 //        dst = src_separation & src_gray;
     }
@@ -453,7 +454,7 @@ bool ArmourFinder::findtagpoint(Mat &dst, const int team) {
 }
 
 bool ArmourFinder::getROIofR() {
-    float k1 = 4.5;
+    float k1 = 4;
 
     float length = min_tagbox.size.height > min_tagbox.size.width ?
                    min_tagbox.size.height : min_tagbox.size.width;
@@ -502,14 +503,16 @@ bool ArmourFinder::findRinROI(Mat &src) {
     std::vector<vector<Point> > center_R_contours;
     findContours(ROI, center_R_contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
-//     imshow("ROI", ROI);
-//     waitKey(1);
+#ifdef PLOT_STEP
+     imshow("ROI", ROI);
+     waitKey(1);
+#endif
 
     for (int i = 0; i != center_R_contours.size(); i++) {
         RotatedRect box = minAreaRect(center_R_contours[i]);
         double c_area = contourArea(center_R_contours[i]);
 
-        if (c_area < 150 || c_area > 600) { continue; }
+        if (c_area < 200 || c_area > 600) { continue; }
 
         ///通过长宽比筛选掉不合适的区域
         int height = box.size.height;
@@ -517,7 +520,7 @@ bool ArmourFinder::findRinROI(Mat &src) {
         if (box.size.height < box.size.width) { swap(height, width); }
         float peri_rate = height / width;//筛掉长宽比不合适的轮廓
 //        cout<<"peri_rate"<<peri_rate<<endl;
-        if (peri_rate > 1.2) { continue; }
+        if (peri_rate > 1) { continue; }
 //        cout<<"c_area"<<c_area<<endl;
 
         Point2f center_tmp;
@@ -526,7 +529,7 @@ bool ArmourFinder::findRinROI(Mat &src) {
 //        if(radius_tmp<5){continue;}
         double cir_area = tool::getCircleArea(radius_tmp);
 //        cout<<"c_area/cir_area"<<c_area/cir_area<<endl;
-        if (c_area / cir_area < 0.5) { continue; }
+        if (c_area / cir_area < 0.65) { continue; }
 
         centerR = cv::minAreaRect(center_R_contours[i]);
 //        RotatedRect rotated_tmp = RotatedRect(Point(0, 0), center_ROI.size(), -90);
@@ -613,7 +616,7 @@ void ArmourFinder::getInfo() {
             float cur_spd =
                     fmod(abs(angleDifference) + CV_2PI, CV_2PI)*1000 / span;
 //                fmod(abs(angleDifference) + CV_2PI, CV_2PI) *1000/ span;
-            float cur_spd_2 = recursive_mean(cur_spd, 5);
+//            float cur_spd_2 = recursive_mean(cur_spd, 5);
             float cur_spd_3 = cur_spd;
 //                float cur_spd_2 = cur_spd;
             //不要小瞧沈航人.jpg （沈航RMer确实很强，这句话是智能车竞赛一个沈航老师有趣的梗）
@@ -625,8 +628,10 @@ void ArmourFinder::getInfo() {
                 auto predict = pf.predict();
                 cur_spd = predict[0];
             }
+//            cur_spd = recursive_mean(cur_spd, 10);
+//            float cur_spd_2 = recursive_mean_2(cur_spd, 3);
 
-            float cur_spd_4 = (cur_spd_2+cur_spd)/2;
+//            float cur_spd_4 = (cur_spd_2+cur_spd)/2;
 
             fit_speed.emplace_back(time_stamp, cur_spd);
 //            fit_speed.emplace_back(time_stamp, cur_spd_4);
@@ -707,7 +712,7 @@ void ArmourFinder::getDirection() {
             float angle_1 = tool::rad2deg(v_angle[i + 5].y);
             float angle_2 = tool::rad2deg(v_angle[i].y);
             float angle_diff = angle_1 - angle_2;
-            if (fabs(angle_diff) < 1)
+            if (fabs(angle_diff) < 1.2)
                 stop++;
             else if (angle_diff > 0)
                 counter_clockwise++;
@@ -747,7 +752,7 @@ float ArmourFinder::predictAngle(uint8_t mode) {
     else if(mode == 3){
 
         float angle = getAcc();
-        angle = recursive_mean(angle,3);
+//        angle = recursive_mean_2(angle,3);
 //        Eigen::VectorXd measure(1);
 //        measure << angle;
 //        pf_angle.update(measure);
@@ -755,7 +760,7 @@ float ArmourFinder::predictAngle(uint8_t mode) {
 //            auto predict = pf_angle.predict();
 //            angle = predict[0];
 //        }
-        cout<<"-----angle----"<<angle<<endl;
+//        cout<<"-----angle----"<<angle<<endl;
         return rotation_direction * angle;
     }
     else if(mode == 4){
@@ -845,6 +850,20 @@ void ArmourFinder::getTimeDura(vector<time_angle>&data,  int dura, int & start_i
 }
 
 float ArmourFinder::recursive_mean(float xn,int size){
+    static int index = 0;  static float last_mean = 0.0f;  float mean = 0.0f;
+    if(index-1){
+        index++;
+        mean = last_mean+(xn-last_mean)/index;
+    }else{
+        mean = last_mean+(xn-last_mean)/size;
+        index     = 0;
+        last_mean = 0.0f;
+    }
+    last_mean = mean;
+    return mean;
+}
+
+float ArmourFinder::recursive_mean_2(float xn,int size){
     static int index = 0;  static float last_mean = 0.0f;  float mean = 0.0f;
     if(index-1){
         index++;

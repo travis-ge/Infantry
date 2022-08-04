@@ -93,12 +93,9 @@ void Frame_0_ProcessRGB(GX_FRAME_CALLBACK_PARAM *pFrame) {
     return;
 }
 
-//void Camera_offline_deal(void *pUserParams){
-//    while(1){
-//        std::cout<<"camera has offline ... "<<std::endl;
-//    }
-//
-//}
+void Camera_offline_deal(void *pUserParams){
+    exit(-1);
+}
 /**
  *
  * @param information

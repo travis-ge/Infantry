@@ -160,6 +160,8 @@ private:
     void shiftWindowFilter(vector<time_angle> &data, int &start_idx, int &end_idx, int window_size);
 
     float recursive_mean(float xn, int size);
+
+    float recursive_mean_2(float xn, int size);
 };
 
 

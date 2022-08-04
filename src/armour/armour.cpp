@@ -641,8 +641,8 @@ void Armour::armour_tracking() {
 //            putText(src, "abs_pitch "+to_string(abs_pitch),Point2f(400,70),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0),1);
         putText(src,"world point "+ to_string(world_point.x)+" "+ to_string(world_point.y)+" "+ to_string(world_point.z),Point2f(0,90),FONT_HERSHEY_COMPLEX_SMALL,1,Scalar(255,0,0));
 #ifdef USE_PRE
-        circle(src,pixelPoint,2,Scalar(0,0,255),-1);
-        circle(src,pre_pixel,2,Scalar(0,255,0),-1);
+        circle(src,pixelPoint,15,Scalar(0,0,255),-1);
+        circle(src,pre_pixel,15,Scalar(0,255,0),-1);
 #endif
 
 #endif
@@ -738,9 +738,7 @@ int camera_offline_cnt = 0;
                 }
                 char cmd = 0x30;
                 int pp = chrono::duration<double,milli> (t1-start_time).count();
-                mtx_port.lock();
                 bool finder_status = energy->run(src,pp,find_color_energy,stm.mode,send_data.pitch,send_data.yaw,send_data.dis);
-                mtx_port.unlock();
                 if(finder_status){
                     cmd = 0x31;
                     energy->energy_last_flag = 1;

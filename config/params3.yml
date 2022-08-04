@@ -4,9 +4,9 @@
 armour:
   debug: 0
   red_spilt_threshold: 95
-  red_gray_threshold: 115
+  red_gray_threshold: 90
   red_green_threshold: 160
-  blue_spilt_threshold: 95
+  blue_spilt_threshold: 80
   blue_gray_threshold: 125
   blue_green_threshold: 60
   light_contour_min: 5
@@ -29,7 +29,7 @@ base:
   simple_yaw_diff: -0.015
   sentry_pitch_diff: 0.007
   sentry_yaw_diff: -0.001
-  buff_pitch_diff: 0.008
+  buff_pitch_diff: 0.012
   buff_yaw_diff: -0.018
 ekf:
   # predict

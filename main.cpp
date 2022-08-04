@@ -36,9 +36,9 @@ int main() {
         std::cout << "Cam0 Start Read Faile ..." << std::endl;
         return 0;
     }
-//    status = GXRegisterDeviceOfflineCallback(cam0->hDevice_,NULL,Camera_offline_deal,&cam0->hCB_);
-//    if(status != GX_STATUS_SUCCESS)
-//        std::cout<<"camera offline function inited failed ... "<<std::endl;
+    status = GXRegisterDeviceOfflineCallback(cam0->hDevice_,NULL,Camera_offline_deal,&cam0->hCB_);
+    if(status != GX_STATUS_SUCCESS)
+        std::cout<<"camera offline function inited failed ... "<<std::endl;
     while (!port.PortInit(0, 115200));
     std::thread serial_receive_thread(&SerialPort::port_receive, port);
     std::thread armour_auto_shoot(&Armour::run, armour);

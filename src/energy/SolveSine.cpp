@@ -15,7 +15,7 @@ using namespace ceres;
 #include "particle_filter.h"
 
 
-//#define PLOT_FITTING
+#define PLOT_FITTING
 
 extern ParticleFilter pf;
 extern ParticleFilter pf_param_loader;
@@ -124,11 +124,13 @@ public:
             sineProblem.SetParameterLowerBound(params_fitting,0,0.7);
             sineProblem.SetParameterUpperBound(params_fitting,0,1.2);
             sineProblem.SetParameterLowerBound(params_fitting,1,1.75);
-            sineProblem.SetParameterUpperBound(params_fitting,1,2.1);
+//            sineProblem.SetParameterUpperBound(params_fitting,1,2.1);
+            sineProblem.SetParameterUpperBound(params_fitting,1,2.3);
             sineProblem.SetParameterLowerBound(params_fitting,2,0);
             sineProblem.SetParameterUpperBound(params_fitting,2,CV_2PI);
             sineProblem.SetParameterLowerBound(params_fitting,3,0.5);
-            sineProblem.SetParameterUpperBound(params_fitting,3,2.2);
+//            sineProblem.SetParameterUpperBound(params_fitting,3,2.2);
+            sineProblem.SetParameterUpperBound(params_fitting,3,2.5);
 
             ceres::Solver::Summary sineSummary;                 // 优化信息
             ceres::Solve(sine_options, &sineProblem, &sineSummary);     // 开始优化
@@ -174,8 +176,8 @@ public:
                     auto  value = params_fitting[0] * ceres::sin(params_fitting[1] * cur_time + params_fitting[2]) + params_fitting[3];
 
                     ////记录下每帧
-                    cv::circle(plot,Point2f(fmod(cnt,cols), rows-(spd[i].y/5*rows)),1, Scalar(0,255,0));
-                    cv::circle(plot,Point2f(fmod(cnt,cols), rows-(value/5*rows)),1, Scalar(0,0,255));
+                    cv::circle(plot,Point2f(fmod(cnt,cols), rows-(spd[i].y/10*rows)),1, Scalar(0,255,0));
+                    cv::circle(plot,Point2f(fmod(cnt,cols), rows-(value/10*rows)),1, Scalar(0,0,255));
                     cnt++;
                     if(fmod(cnt,cols) == 0){plot =Mat::zeros(rows,cols, CV_8UC3);}
                     imshow("plot_test_ture",plot);
@@ -320,9 +322,9 @@ private:
 
     const int sin_skip_stride = 1;
     const int phi_skip_stride = 1;
-    const int sin_sample_dura = 2500;             //参数拟合使用的时间
+    const int sin_sample_dura = 12500;             //参数拟合使用的时间
 //    const int phi_sample_dura = 15;             //相位拟合使用的时间
-    const int phi_sample_dura = 1000;             //相位拟合使用的时间
+    const int phi_sample_dura = 150;             //相位拟合使用的时间
 
     int sample_num = 0;
     int sample_dura = 0;
